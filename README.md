@@ -1,7 +1,7 @@
 # AppointmentAgenda
 
-AppointmentAgenda é uma ferramenta de agendamento baseada em assembly que impõe regras de agendamento, evita conflitos e oferece flexibilidade para editar e remover eventos, garantindo uma experiência de gerenciamento de eventos eficiente e organizada.
- 
+AppointmentAgenda is an assembly-based scheduling tool that enforces scheduling rules, prevents conflicts, and provides flexibility to edit and remove events, ensuring an efficient and organized event management experience.
+
 ## Functionalities
 
 ### Event Details
