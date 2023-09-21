@@ -16,3 +16,12 @@ Users have the flexibility to modify and edit events in AppointmentAgenda. This 
 ### Removing Events
 Additionally, the calendar allows users to remove events. This feature ensures that outdated or canceled events can be easily removed from the schedule, maintaining an organized and accurate schedule.
 
+### Authors
+
+| Names                       | USP Number |
+| :---------------------------| ---------- |
+| Luiz Felipe Diniz Costa     | 13782032   |
+| Rafael Jun Morita           | 10845040   |
+| Pedro Vinícius Cruz         | 14139115   |
+
+Project for the course "Computer Organization and Architecture" at the Institute of Mathematics and Computer Science, University of Sao Paulo
