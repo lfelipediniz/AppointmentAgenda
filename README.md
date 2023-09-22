@@ -16,7 +16,34 @@ Users have the flexibility to modify and edit events in AppointmentAgenda. This 
 ### Removing Events
 Additionally, the calendar allows users to remove events. This feature ensures that outdated or canceled events can be easily removed from the schedule, maintaining an organized and accurate schedule.
 
-### Authors
+## Getting Started
+
+### Prerequisites
+
+- [OpenJDK](https://openjdk.org/) or [Java](https://www.oracle.com/br/java/technologies/downloads/)
+- [Mars](https://courses.missouristate.edu/KenVollmar/mars/download.htm)
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/lfelipediniz/AppointmentAgenda.git
+```
+
+2. Navigate to the project directory
+
+```bash
+cd AppointmentAgenda
+```
+
+### Usage
+
+To run our code, open it in the **Mars** program. After opening it, press the F3 key on your keyboard. If everything goes well, press F5 and enjoy your agenda of appointments.
+
+
+
+## Authors
 
 | Names                       | USP Number |
 | :---------------------------| ---------- |
@@ -24,4 +51,4 @@ Additionally, the calendar allows users to remove events. This feature ensures t
 | Rafael Jun Morita           | 10845040   |
 | Pedro Vinícius Cruz         | 14139115   |
 
-Project for the course "Computer Organization and Architecture" at the Institute of Mathematics and Computer Science, University of Sao Paulo
+Project for the course ["Computer Organization and Architecture"](https://uspdigital.usp.br/jupiterweb/obterDisciplina?sgldis=SSC0902) at the Institute of Mathematics and Computer Science, University of Sao Paulo
