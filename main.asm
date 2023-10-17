@@ -7,10 +7,11 @@ day_prompt:   .asciiz "Enter the day of the event: "
 start_prompt: .asciiz "Enter the starting time of the event (e.g., 13.30): "
 end_prompt:   .asciiz "Enter the ending time of the event (e.g., 14.30): "
 
-#             Defina a estrutura do nó do evento
+#  Definindo a estrutura do nó do evento e alinhado corretamente (64 bytes)
+.align        3
 event_node:   .space 64
 
-#             Defina a estrutura de eventos
+# Estrutura do evento
 event_list:   .word 0 # Início da lista de eventos
 event_count:  .word 0 # Contador de eventos
 
