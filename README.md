@@ -27,15 +27,15 @@ Additionally, the calendar allows users to remove events. This feature ensures t
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/lfelipediniz/AppointmentAgenda.git
-```
+    ```bash
+    git clone https://github.com/lfelipediniz/AppointmentAgenda.git
+    ```
 
 2. Navigate to the project directory
 
-```bash
-cd AppointmentAgenda
-```
+    ```bash
+    cd AppointmentAgenda
+    ```
 
 ### Usage
 
