@@ -2,10 +2,14 @@
     # input action (numero)
     action: .word 0
 
+    # contador de eventos
+    eventCounter: .word 0
+
     # arrays
 
     names:
         .space 2500 # 50 posições de strings com 50 caracteres
+
     days:
         .align 2
         .space 200
@@ -36,18 +40,54 @@ syscall
 
 j loop_action
 
+# inicializa o registrador $t0 com 0
+li $t0, 0
 
-# função para inserir um evento
 insert:
+    # carrega o valor de eventCounter
+    lw $t1, eventCounter
 
-    # impressão da pergunta
+    # verifica se eventCounter é igual a 0
+    beqz $t1, insertFirst
+
+    li $t2, 50      # tamanho de cada entrada no array names
+    mul $t2, $t2, $t1   # calculando a posição de inserção (50 * eventCounter)
+    add $t3, $t2, $t4   # soma com o endereço base do names
+
+    # le do nome do evento do usuário
     li $v0, 4
     la $a0, insert_eventName
     syscall
+    li $v0, 8
+    la $a0, names  # endereço base do names
+    add $a0, $a0, $t2  # faz o deslocamento
+    li $a1, 50  # tanhanho maximo do nome do evento
+    syscall
 
-    
+    # incrementa eventCounter em 1
+    addi $t1, $t1, 1
+    sw $t1, eventCounter
 
     j loop_action
+
+#caso seja a primera vez que está fazendo a inserção de um evento
+insertFirst:
+    # leitura do nome do evento do usuário
+    li $v0, 4
+    la $a0, insert_eventName
+    syscall
+    li $v0, 8
+    la $a0, names # endereço base do names
+    li $a1, 50  # tanhanho maximo do nome do evento
+    syscall
+
+    # incrementa eventCounter em 1
+    addi $t1, $t1, 1
+    sw $t1, eventCounter
+
+    j loop_action
+
+
 
 # função para imprimir todos os eventos
 print:
