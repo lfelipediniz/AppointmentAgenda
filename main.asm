@@ -3,7 +3,7 @@
     action: .word 0
 
     # contador de eventos
-    eventCounter: .word 0
+    eventCounter: .word 1
 
     # arrays
 
@@ -28,7 +28,8 @@
     errorInput: .asciiz "Unable to insert :(\n"
     welcome: .asciiz "Welcome to AppointmentAgenda!\n"
 
-    insert_eventName: .asciiz "What is a event name?\n"
+    insert_eventName: .asciiz "What is the event name?\n"
+    insert_eventDay: .asciiz "What day does this event occur?\n"
 
 .text
 .globl main
@@ -47,46 +48,40 @@ insert:
     # carrega o valor de eventCounter
     lw $t1, eventCounter
 
-    # verifica se eventCounter é igual a 0
-    beqz $t1, insertFirst
-
     li $t2, 50      # tamanho de cada entrada no array names
     mul $t2, $t2, $t1   # calculando a posição de inserção (50 * eventCounter)
     add $t3, $t2, $t4   # soma com o endereço base do names
 
-    # le do nome do evento do usuário
+    # imprime a pergunta
     li $v0, 4
     la $a0, insert_eventName
     syscall
+
+    # le do nome do evento do usuário
     li $v0, 8
     la $a0, names  # endereço base do names
     add $a0, $a0, $t2  # faz o deslocamento
-    li $a1, 50  # tanhanho maximo do nome do evento
+    li $a1, 50  # tamanho máximo do nome do evento
     syscall
 
-    # incrementa eventCounter em 1
-    addi $t1, $t1, 1
-    sw $t1, eventCounter
-
-    j loop_action
-
-#caso seja a primera vez que está fazendo a inserção de um evento
-insertFirst:
-    # leitura do nome do evento do usuário
+    # imprime a pergunta
     li $v0, 4
-    la $a0, insert_eventName
-    syscall
-    li $v0, 8
-    la $a0, names # endereço base do names
-    li $a1, 50  # tanhanho maximo do nome do evento
+    la $a0, insert_eventDay
     syscall
 
-    # incrementa eventCounter em 1
+    # leitura do número inteiro do usuário
+    li $v0, 5
+    syscall
+
+    # armazena o valor do inteiro na posição apropriada do array days
+    add $t3, $t3, $t2  # considerando o mesmo deslocamento que foi usado para o array names
+    sw $v0, days($t3)
+
+    # Incrementa o contador de eventos
     addi $t1, $t1, 1
     sw $t1, eventCounter
 
     j loop_action
-
 
 
 # função para imprimir todos os eventos
@@ -126,12 +121,12 @@ main:
         beq $t0, 3, remove
         beq $t0, 4, edit
 
-        # caso a acao nao seja valida
+        # caso a ação não seja válida
         li $v0, 4
         la $a0, invalidAction
         syscall
 
-        # chamamos o loop aqui caso o usuario digite uma acao ilegal
+        # chamamos o loop aqui caso o usuário digite uma ação ilegal
         j loop_action
 
 quit:
