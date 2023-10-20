@@ -24,10 +24,18 @@
     errorInput: .asciiz "Unable to insert :(\n"
     welcome: .asciiz "Welcome to AppointmentAgenda!\n"
 
-    insert_eventName: .asciiz "What is the event name?\n"
-    insert_eventDay: .asciiz "What day does this event occur?\n"
-    insert_eventStartTime: .asciiz "What time does this event start?\n"
-    insert_eventEndTime: .asciiz "What time does this event end?\n"
+   # line break
+   lineBreak: .asciiz "\n"
+
+   # insert function outputs
+   insert_eventName: .asciiz "What is the event name?\n"
+   insert_eventDay: .asciiz "What day does this event occur?\n"
+   insert_eventStartTime: .asciiz "What time does this event start?\n"
+   insert_eventEndTime: .asciiz "What time does this event end?\n"
+
+   # print function outputs
+   print_eventName: .asciiz "Event name: "
+   print_eventDay: .asciiz "Event day: "
 
 .text
 .globl main
@@ -86,36 +94,56 @@ insert:
 # function of print all events
 print:
     # using auxCounter set to value 0
-    li $t0, 0
+    li $t0, 1
     sw $t0, auxCounter
 
     # loop to print all informations about events
     loop_print:
-    # if auxCounter is equal to eventCounter, we have printed all events
-        lw $t0, auxCounter
-        lw $t1, eventCounter
-        bge $t0, $t1, exit_print
-      # print event name
-        li $v0, 4
-        la $a0, eventsName
-        mul $t0, $t0, 50
-        add $a0, $a0, $t0
-        syscall
 
+      # if auxCounter is equal to eventCounter, we have printed all events
       lw $t0, auxCounter
+      lw $t1, eventCounter
+      bge $t0, $t1, exit_print
+
+      #print text of event name
+      li $v0, 4
+      la $a0, print_eventName
+      syscall
+
+      # print event name
+      li $v0, 4
+      la $a0, eventsName
+      mul $t0, $t0, 50
+      add $a0, $a0, $t0
+      syscall
+
+      # reset auxCounter to 1
+      lw $t0, auxCounter 
+
+      # print text of event day
+      li $v0, 4
+      la $a0, print_eventDay
+      syscall
 
       # print event day
-         li $v0, 4
-         la $a0, eventsDay
-         mul $t0, $t0, 4
-         add $a0, $a0, $t0
-         syscall
+      li $v0, 4
+      la $a0, eventsDay
+      mul $t0, $t0, 4
+      add $a0, $a0, $t0
+      syscall
          
-        # increment auxCounter
-        lw $t0, auxCounter
-        addi $t0, $t0, 1
-        sw $t0, auxCounter
-        j loop_print
+      # increment auxCounter
+      lw $t0, auxCounter
+      addi $t0, $t0, 1
+      sw $t0, auxCounter
+
+      # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
+
+      
+      j loop_print
 
     exit_print:
         j loop_action
