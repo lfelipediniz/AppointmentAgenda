@@ -14,7 +14,7 @@
     auxCounter: .word 0
 
    # events name array with 900 bytes
-    eventsName: .space 900
+    eventsName: .space 1500
 
     # strings returned to the user
     actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
@@ -45,34 +45,33 @@ insert:
     la $a0, insert_eventName
     syscall
 
-# eventCounter starts in 1, so we need to multiply it by 30 to get the correct position in the array
+# eventCounter starts in 1, so we need to multiply it by 50 to get the correct position in the array
     lw $t0, eventCounter
-    mul $t0, $t0, 30
+    mul $t0, $t0, 50
 
 # reading the event name
 
     li $v0, 8
     la $a0, eventsName
     add $a0, $a0, $t0
-    li $a1, 30
+    li $a1, 50
     syscall
 
-# printing the atual name storage in the array
-    li $v0, 4
-    la $a0, eventsName
-    add $a0, $a0, $t0
-    syscall
+# # printing the atual name storage in the array
+#     li $v0, 4
+#     la $a0, eventsName
+#     add $a0, $a0, $t0
+#     syscall
 
 # incresse at one the eventCounter
     lw $t0, eventCounter
     addi $t0, $t0, 1
     sw $t0, eventCounter
 
-# printing the eventCounter
-    li $v0, 1
-    lw $a0, eventCounter
-    syscall
-
+# # printing the eventCounter
+#     li $v0, 1
+#     lw $a0, eventCounter
+#     syscall
 
 j loop_action
 
@@ -90,7 +89,7 @@ print:
 
         li $v0, 4
         la $a0, eventsName
-        mul $t0, $t0, 30
+        mul $t0, $t0, 50
         add $a0, $a0, $t0
         syscall
 
