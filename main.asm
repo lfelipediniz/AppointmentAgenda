@@ -1,28 +1,22 @@
+
+#this script is a simple agenda for appointments make in MIPS assembly
+
+
+# data segment
 .data
-    # input action (numero)
+    #action inserted by the user
     action: .word 0
 
-    # contador de eventos
+    # counter of events
     eventCounter: .word 1
 
-    # arrays
+    # auxiliar counter
+    auxCounter: .word 1
 
-    names:
-        .space 2500 # 50 posições de strings com 50 caracteres
+   # events name array with 900 bytes
+    eventsName: .space 900
 
-    days:
-        .align 2
-        .space 200
-
-    startTimes:
-        .align 3
-        .space 200
-
-    endTimes:
-        .align 3
-        .space 200
-
-    # retornos pro usuario
+    # strings returned to the user
     actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
     invalidAction: .asciiz "Invalid Action!\n"
     errorInput: .asciiz "Unable to insert :(\n"
@@ -30,63 +24,80 @@
 
     insert_eventName: .asciiz "What is the event name?\n"
     insert_eventDay: .asciiz "What day does this event occur?\n"
+    insert_eventStartTime: .asciiz "What time does this event start?\n"
+    insert_eventEndTime: .asciiz "What time does this event end?\n"
 
 .text
 .globl main
 
-# impressão das boas-vindas
+# welcome message
 li $v0, 4
 la $a0, welcome
 syscall
 
 j loop_action
 
-# inicializa o registrador $t0 com 0
-li $t0, 0
-
+# this function inserts a new event
 insert:
-    # carrega o valor de eventCounter
-    lw $t1, eventCounter
 
-    li $t2, 50      # tamanho de cada entrada no array names
-    mul $t2, $t2, $t1   # calculando a posição de inserção (50 * eventCounter)
-    add $t3, $t2, $t4   # soma com o endereço base do names
-
-    # imprime a pergunta
+# printing the event name question
     li $v0, 4
     la $a0, insert_eventName
     syscall
 
-    # le do nome do evento do usuário
+# eventCounter starts in 1, so we need to multiply it by 30 to get the correct position in the array
+    lw $t0, eventCounter
+    mul $t0, $t0, 30
+
+# reading the event name
+
     li $v0, 8
-    la $a0, names  # endereço base do names
-    add $a0, $a0, $t2  # faz o deslocamento
-    li $a1, 50  # tamanho máximo do nome do evento
+    la $a0, eventsName
+    add $a0, $a0, $t0
+    li $a1, 30
     syscall
 
-    # imprime a pergunta
+# printing the atual name storage in the array
     li $v0, 4
-    la $a0, insert_eventDay
+    la $a0, eventsName
+    add $a0, $a0, $t0
     syscall
 
-    # leitura do número inteiro do usuário
-    li $v0, 5
+# incresse at one the eventCounter
+    lw $t0, eventCounter
+    addi $t0, $t0, 1
+    sw $t0, eventCounter
+
+# printing the eventCounter
+    li $v0, 1
+    lw $a0, eventCounter
     syscall
 
-    # armazena o valor do inteiro na posição apropriada do array days
-    add $t3, $t3, $t2  # considerando o mesmo deslocamento que foi usado para o array names
-    sw $v0, days($t3)
 
-    # Incrementa o contador de eventos
-    addi $t1, $t1, 1
-    sw $t1, eventCounter
+j loop_action
 
-    j loop_action
-
-
-# função para imprimir todos os eventos
+# function of print all events
 print:
-    j loop_action
+
+# using auxCounter setting to value 1
+    li $t0, 1
+    sw $t0, auxCounter
+
+# incresse 1 to auxCounter while it is less than or equal to eventCounter
+# printing all events names storeged in names array
+    loop_print:
+        lw $t0, auxCounter
+        lw $t1, eventCounter
+        ble $t0, $t1, print_eventName
+
+        j loop_action
+
+    print_eventName:
+        li $v0, 4
+        la $a0, eventsName
+        mul $t0, $t0, 30
+        add $a0, $a0, $t0
+        syscall
 
 # função para remover um evento
 remove:
