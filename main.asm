@@ -1,20 +1,22 @@
 
 #this script is a simple agenda for appointments make in MIPS assembly
 
-
 # data segment
 .data
     #action inserted by the user
     action: .word 0
 
-    # counter of events
-    eventCounter: .word 1
+   # counter of events
+   eventCounter: .word 1
 
-    # auxiliar counter
-    auxCounter: .word 0
+   # auxiliar counter
+   auxCounter: .word 0
 
-   # events name array with 900 bytes
-    eventsName: .space 1500
+   # events name array with 1500 bytes
+   eventsName: .space 1500
+
+   # events day array with 120 bytes, 30 days * 4 bytes
+   eventsDay: .space 120  
 
     # strings returned to the user
     actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
@@ -40,40 +42,46 @@ j loop_action
 # this function inserts a new event
 insert:
 
-# printing the event name question
-    li $v0, 4
-    la $a0, insert_eventName
-    syscall
+   # printing the event name question
+      li $v0, 4
+      la $a0, insert_eventName
+      syscall
 
-# eventCounter starts in 1, so we need to multiply it by 50 to get the correct position in the array
-    lw $t0, eventCounter
-    mul $t0, $t0, 50
+   # eventCounter starts in 1, so we need to multiply it by 50 to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 50
 
-# reading the event name
+   # reading the event name
 
-    li $v0, 8
-    la $a0, eventsName
-    add $a0, $a0, $t0
-    li $a1, 50
-    syscall
+      li $v0, 8
+      la $a0, eventsName
+      add $a0, $a0, $t0
+      li $a1, 50
+      syscall
 
-# # printing the atual name storage in the array
-#     li $v0, 4
-#     la $a0, eventsName
-#     add $a0, $a0, $t0
-#     syscall
 
-# incresse at one the eventCounter
-    lw $t0, eventCounter
-    addi $t0, $t0, 1
-    sw $t0, eventCounter
+   # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 4
 
-# # printing the eventCounter
-#     li $v0, 1
-#     lw $a0, eventCounter
-#     syscall
+   # printing the event day question
+      li $v0, 4
+      la $a0, insert_eventDay
+      syscall
 
-j loop_action
+   # reading the event day
+         li $v0, 8
+         la $a0, eventsDay
+         add $a0, $a0, $t0
+         li $a1, 4
+         syscall
+
+   # incresse at one the eventCounter
+      lw $t0, eventCounter
+      addi $t0, $t0, 1
+      sw $t0, eventCounter
+
+   j loop_action
 
 # function of print all events
 print:
