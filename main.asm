@@ -89,18 +89,28 @@ print:
     li $t0, 0
     sw $t0, auxCounter
 
-    # loop to print all event names
+    # loop to print all informations about events
     loop_print:
+    # if auxCounter is equal to eventCounter, we have printed all events
         lw $t0, auxCounter
         lw $t1, eventCounter
         bge $t0, $t1, exit_print
-
+      # print event name
         li $v0, 4
         la $a0, eventsName
         mul $t0, $t0, 50
         add $a0, $a0, $t0
         syscall
 
+      lw $t0, auxCounter
+
+      # print event day
+         li $v0, 4
+         la $a0, eventsDay
+         mul $t0, $t0, 4
+         add $a0, $a0, $t0
+         syscall
+         
         # increment auxCounter
         lw $t0, auxCounter
         addi $t0, $t0, 1
