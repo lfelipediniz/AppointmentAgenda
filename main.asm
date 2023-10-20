@@ -11,7 +11,7 @@
     eventCounter: .word 1
 
     # auxiliar counter
-    auxCounter: .word 1
+    auxCounter: .word 0
 
    # events name array with 900 bytes
     eventsName: .space 900
@@ -78,26 +78,30 @@ j loop_action
 
 # function of print all events
 print:
-
-# using auxCounter setting to value 1
-    li $t0, 1
+    # using auxCounter set to value 0
+    li $t0, 0
     sw $t0, auxCounter
 
-# incresse 1 to auxCounter while it is less than or equal to eventCounter
-# printing all events names storeged in names array
+    # loop to print all event names
     loop_print:
         lw $t0, auxCounter
         lw $t1, eventCounter
-        ble $t0, $t1, print_eventName
+        bge $t0, $t1, exit_print
 
-        j loop_action
-
-    print_eventName:
         li $v0, 4
         la $a0, eventsName
         mul $t0, $t0, 30
         add $a0, $a0, $t0
         syscall
+
+        # increment auxCounter
+        lw $t0, auxCounter
+        addi $t0, $t0, 1
+        sw $t0, auxCounter
+        j loop_print
+
+    exit_print:
+        j loop_action
 
 # função para remover um evento
 remove:
