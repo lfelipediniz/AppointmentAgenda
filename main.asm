@@ -43,6 +43,8 @@
    insert_eventDay: .asciiz "What day does this event occur?\n"
    insert_eventStartTimeHours: .asciiz "What is the event start time (hours) |Format 24h|?\n"
    insert_eventStartTimeMinutes: .asciiz "What is the event start time (minutes)?\n"
+   insert_eventEndTimeHours: .asciiz "What is the event end time (hours) |Format 24h|?\n"
+   insert_eventEndTimeMinutes: .asciiz "What is the event end time (minutes)?\n"
 
    # print function outputs
    print_eventName: .asciiz "Event name: "
@@ -123,7 +125,7 @@ insert:
 
    #printing the event end time hours question
       li $v0, 4
-      la $a0, insert_eventStartTimeHours
+      la $a0, insert_eventEndTimeHours
       syscall
 
    # reading the event end time hours
@@ -135,7 +137,7 @@ insert:
 
    #printing the event end time minutes question
       li $v0, 4
-      la $a0, insert_eventStartTimeMinutes
+      la $a0, insert_eventEndTimeHours
       syscall
 
    # reading the event end time minutes
@@ -151,6 +153,7 @@ insert:
       sw $t0, eventCounter
 
       j loop_action
+
 
 # function of print all events
 print:
