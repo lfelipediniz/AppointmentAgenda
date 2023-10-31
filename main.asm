@@ -49,8 +49,8 @@
       # print function outputs
       print_eventName: .asciiz "Event name: "
       print_eventDay: .asciiz "Event day: "
-      print_eventStartTime: .asciiz "Event start time:\n"
-      print_eventEndTime: .asciiz "Event end time:\n"
+      print_eventStartTime: .asciiz "Event start time: "
+      print_eventEndTime: .asciiz "Event end time: "
 
 .text
 .globl main
@@ -128,7 +128,7 @@ insert:
       la $a0, lineBreak
       syscall
 
-   # printing the event end question
+   # print event end time
       li $v0, 4
       la $a0, insert_eventEndTime
       syscall
@@ -138,13 +138,6 @@ insert:
       la $a0, eventsEndTime
       add $a0, $a0, $t0
       li $a1, 6 #MAX_LENGTH_HOUR
-      syscall
-
-   #print event end time
-      li $v0, 4
-      la $a0, eventsEndTime
-      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
-      add $a0, $a0, $t0
       syscall
 
    # print line break
@@ -166,7 +159,7 @@ print:
     li $t0, 1
     sw $t0, auxCounter
 
-    # loop to print all informations about events
+    # loop to print all information about events
     loop_print:
 
       # if auxCounter is equal to eventCounter, we have printed all events
@@ -174,81 +167,78 @@ print:
       lw $t1, eventCounter
       bge $t0, $t1, exit_print
 
-      #print text of event name
+      # Print text of event name
       li $v0, 4
       la $a0, print_eventName
       syscall
 
-      # print event name
+      # Print event name
       li $v0, 4
       la $a0, eventsName
-      mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
-      add $a0, $a0, $t0
+      mul $t2, $t0, 50 #MAX_LENGTH_EVENT_NAME
+      add $a0, $a0, $t2
       syscall
 
-      # reset auxCounter to 1
+      # Reset auxCounter to 1
       lw $t0, auxCounter 
 
-      # print text of event day
+      # Print text of event day
       li $v0, 4
       la $a0, print_eventDay
       syscall
 
-      # print event day
+      # Print event day
       li $v0, 4
       la $a0, eventsDay
-      mul $t0, $t0, 3 #MAX_LENGTH_DAY
-      add $a0, $a0, $t0
+      mul $t2, $t0, 3 #MAX_LENGTH_DAY
+      add $a0, $a0, $t2
       syscall
 
-      # print line break
+      # Print line break
       li $v0, 4
       la $a0, lineBreak
       syscall
 
-      # reset auxCounter to 1
-      lw $t0, auxCounter
-
-      # print text of event start time
+      # Print text of event start time
       li $v0, 4
       la $a0, print_eventStartTime
       syscall
 
-      # print event start time
+      # Print event start time
       li $v0, 4
       la $a0, eventsStartTime
-      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
-      add $a0, $a0, $t0
+      mul $t2, $t0, 6 #MAX_LENGTH_HOUR
+      add $a0, $a0, $t2
       syscall
 
-      # print line break
+      # Print line break
       li $v0, 4
       la $a0, lineBreak
       syscall
 
-      # print text of event end time
+      # Print text of event end time
       li $v0, 4
       la $a0, print_eventEndTime
       syscall
 
-      # print event end time
+      # Print event end time
       li $v0, 4
       la $a0, eventsEndTime
-      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
-      add $a0, $a0, $t0
+      mul $t2, $t0, 6 #MAX_LENGTH_HOUR
+      add $a0, $a0, $t2
       syscall
 
-      # print line break
+      # Print line break
       li $v0, 4
       la $a0, lineBreak
       syscall
 
-      # increment auxCounter
+      # Increment auxCounter
       lw $t0, auxCounter
       addi $t0, $t0, 1
       sw $t0, auxCounter
 
-      # print line break
+      # Print line break
       li $v0, 4
       la $a0, lineBreak
       syscall
@@ -257,6 +247,8 @@ print:
 
     exit_print:
         j loop_action
+
+
 
 # function to remove an event
 remove:
