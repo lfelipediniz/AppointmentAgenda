@@ -2,57 +2,55 @@
 
 # data segment
 .data
-   #action inserted by the user
-   action: .word 0
 
-   # counter of events
-   eventCounter: .word 1
+   #constants
+      #strings
+      MAX_EVENTS: .word 100
+      MAX_LENGTH_EVENT_NAME: .word 50
+      MAX_LENGTH_DAY: .word 3
+      MAX_LENGTH_HOUR: .word 6
 
-   # auxiliar counter
-   auxCounter: .word 0
+   #variables
+      #action inserted by the user
+      action: .word 0
+      # counter of events
+      eventCounter: .word 1
+      # auxiliar counter
+      auxCounter: .word 0
 
-   # events name array with 1500 bytes
-   eventsName: .space 1500
+   # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
+   eventsName: .space 5000
 
-   # events day array  with 120 bytes, 30 days * 4 bytes
-   eventsDay: .space 120  
+   # events day array  with  MAX_LENGTH_DAY * MAX_EVENTS bytes
+   eventsDay: .space 300
 
-   # events start time hours array with 120 bytes, 30 'hours' * 4 bytes
-   eventsStartTimeHours: .space 120
+   # events start time hours array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   eventsStartTime: .space 600
 
-   # events start time minutes array with 120 bytes, 30 'minutes' * 4 bytes
-   eventsStartTimeMinutes: .space 120
-
-   # events end time hours array with 120 bytes, 30 'hours' * 4 bytes
-   eventsEndTimeHours: .space 120
-
-   # events end time minutes array with 120 bytes, 30 'minutes' * 4 bytes
-   eventsEndTimeMinutes: .space 120
+   # events end time minutes array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   eventsEndTime: .space 600
 
    # strings returned to the user
-   actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
-   invalidAction: .asciiz "Invalid Action!\n"
-   errorInput: .asciiz "Unable to insert :(\n"
-   welcome: .asciiz "Welcome to AppointmentAgenda!\n"
+      actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
+      invalidAction: .asciiz "Invalid Action!\n"
+      errorInput: .asciiz "Unable to insert :(\n"
+      welcome: .asciiz "Welcome to AppointmentAgenda!\n"
 
-   # line break
-   lineBreak: .asciiz "\n"
+      # line break
+      lineBreak: .asciiz "\n"
 
-   # insert function outputs
-   insert_eventName: .asciiz "What is the event name?\n"
-   insert_eventDay: .asciiz "What day does this event occur?\n"
-   insert_eventStartTimeHours: .asciiz "What is the event start time (hours) |Format 24h|?\n"
-   insert_eventStartTimeMinutes: .asciiz "What is the event start time (minutes)?\n"
-   insert_eventEndTimeHours: .asciiz "What is the event end time (hours) |Format 24h|?\n"
-   insert_eventEndTimeMinutes: .asciiz "What is the event end time (minutes)?\n"
+      # insert function outputs
+      insert_eventName: .asciiz "What is the event name?\n"
+      insert_eventDay: .asciiz "What day does this event occur?\n"
+      insert_eventStartTime: .asciiz "What is the event start time? Format: HH.MM\n"
+      insert_eventEndTime: .asciiz "What is the event end time? Format: HH.MM?\n"
 
-   # print function outputs
-   print_eventName: .asciiz "Event name: "
-   print_eventDay: .asciiz "Event day: "
-   print_eventStartTime: .asciiz "Event start time:\n"
-   print_eventStartTimeHours: .asciiz "Hour: "
-   print_eventStartTimeMinutes: .asciiz "Minute: "
-   print_eventEndTime: .asciiz "Event end time:\n"
+
+      # print function outputs
+      print_eventName: .asciiz "Event name: "
+      print_eventDay: .asciiz "Event day: "
+      print_eventStartTime: .asciiz "Event start time:\n"
+      print_eventEndTime: .asciiz "Event end time:\n"
 
 .text
 .globl main
@@ -72,79 +70,86 @@ insert:
       la $a0, insert_eventName
       syscall
 
-   # eventCounter starts in 1, so we need to multiply it by 50 to get the correct position in the array
+   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 50
+      mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
 
    # reading the event name
       li $v0, 8
       la $a0, eventsName
       add $a0, $a0, $t0
-      li $a1, 50
+      li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
-   # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
+   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_DAY to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 4
+      mul $t0, $t0, 3 #MAX_LENGTH_DAY
 
    # printing the event day question
       li $v0, 4
       la $a0, insert_eventDay
       syscall
 
-   # reading the event day
+   # reading the event day as string
       li $v0, 8
       la $a0, eventsDay
       add $a0, $a0, $t0
-      li $a1, 4
+      li $a1, 3 #MAX_LENGTH_DAY
       syscall
 
-   #printing the event start time hours question
+   # print line break
       li $v0, 4
-      la $a0, insert_eventStartTimeHours
+      la $a0, lineBreak
       syscall
 
-   # reading the event start time hours
-      li $v0, 8
-      la $a0, eventsStartTimeHours
-      add $a0, $a0, $t0
-      li $a1, 4
-      syscall
+   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
 
-   #printing the event start time minutes question
+
+   # printing the event start question
       li $v0, 4
-      la $a0, insert_eventStartTimeMinutes
+      la $a0, insert_eventStartTime
       syscall
 
-   # reading the event start time minutes
+   # reading the event start time as string
       li $v0, 8
-      la $a0, eventsStartTimeMinutes
+      la $a0, eventsStartTime
       add $a0, $a0, $t0
-      li $a1, 4
+      li $a1, 6 #MAX_LENGTH_HOUR
       syscall
 
-   #printing the event end time hours question
+   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
+
+   # print line break
       li $v0, 4
-      la $a0, insert_eventEndTimeHours
+      la $a0, lineBreak
       syscall
 
-   # reading the event end time hours
-      li $v0, 8
-      la $a0, eventsEndTimeHours
-      add $a0, $a0, $t0
-      li $a1, 4
-      syscall
-
-   #printing the event end time minutes question
+   # printing the event end question
       li $v0, 4
-      la $a0, insert_eventEndTimeHours
+      la $a0, insert_eventEndTime
       syscall
 
-   # reading the event end time minutes
+   # reading the event end time as string
       li $v0, 8
-      la $a0, eventsEndTimeMinutes
+      la $a0, eventsEndTime
       add $a0, $a0, $t0
-      li $a1, 4
+      li $a1, 6 #MAX_LENGTH_HOUR
+      syscall
+
+   #print event end time
+      li $v0, 4
+      la $a0, eventsEndTime
+      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
+      add $a0, $a0, $t0
+      syscall
+
+   # print line break
+      li $v0, 4
+      la $a0, lineBreak
       syscall
 
    # incresse at one the eventCounter
@@ -177,7 +182,7 @@ print:
       # print event name
       li $v0, 4
       la $a0, eventsName
-      mul $t0, $t0, 50
+      mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
       add $a0, $a0, $t0
       syscall
 
@@ -192,8 +197,13 @@ print:
       # print event day
       li $v0, 4
       la $a0, eventsDay
-      mul $t0, $t0, 4
+      mul $t0, $t0, 3 #MAX_LENGTH_DAY
       add $a0, $a0, $t0
+      syscall
+
+      # print line break
+      li $v0, 4
+      la $a0, lineBreak
       syscall
 
       # reset auxCounter to 1
@@ -204,66 +214,33 @@ print:
       la $a0, print_eventStartTime
       syscall
 
-      # print text of event start time hours
+      # print event start time
       li $v0, 4
-      la $a0, print_eventStartTimeHours
-      syscall
-
-      # print event start time hours
-      li $v0, 4
-      la $a0, eventsStartTimeHours
-      mul $t0, $t0, 4
+      la $a0, eventsStartTime
+      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
       add $a0, $a0, $t0
       syscall
 
-      # reset auxCounter to 1
-      lw $t0, auxCounter
-
-      # print text of event start time minutes
+      # print line break
       li $v0, 4
-      la $a0, print_eventStartTimeMinutes
+      la $a0, lineBreak
       syscall
-
-      # print event start time minutes
-      li $v0, 4
-      la $a0, eventsStartTimeMinutes
-      mul $t0, $t0, 4
-      add $a0, $a0, $t0
-      syscall
-
-      # reset auxCounter to 1
-      lw $t0, auxCounter
 
       # print text of event end time
       li $v0, 4
       la $a0, print_eventEndTime
       syscall
 
-      # print text of event end time hours
+      # print event end time
       li $v0, 4
-      la $a0, print_eventStartTimeHours
-      syscall
-
-      # print event end time hours
-      li $v0, 4
-      la $a0, eventsEndTimeHours
-      mul $t0, $t0, 4
+      la $a0, eventsEndTime
+      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
       add $a0, $a0, $t0
       syscall
 
-      # reset auxCounter to 1
-      lw $t0, auxCounter
-
-      # print text of event end time minutes
+      # print line break
       li $v0, 4
-      la $a0, print_eventStartTimeMinutes
-      syscall
-
-      # print event end time minutes
-      li $v0, 4
-      la $a0, eventsEndTimeMinutes
-      mul $t0, $t0, 4
-      add $a0, $a0, $t0
+      la $a0, lineBreak
       syscall
 
       # increment auxCounter
