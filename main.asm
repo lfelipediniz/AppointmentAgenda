@@ -7,8 +7,8 @@
       #strings
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
-      MAX_LENGTH_DAY: .word 3
-      MAX_LENGTH_HOUR: .word 6
+      MAX_LENGTH_DAY: .word 4
+      MAX_LENGTH_HOUR: .word 4
 
    #variables
       #action inserted by the user
@@ -22,13 +22,15 @@
    eventsName: .space 5000
 
    # events day array  with  MAX_LENGTH_DAY * MAX_EVENTS bytes
-   eventsDay: .space 300
+   eventsDay:
+         .alig 2
+         .space 400
 
    # events start time hours array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
-   eventsStartTime: .space 600
+   eventsStartTime: .space 400
 
    # events end time minutes array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
-   eventsEndTime: .space 600
+   eventsEndTime: .space 400
 
    # strings returned to the user
       actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
@@ -83,24 +85,19 @@ insert:
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_DAY to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 3 #MAX_LENGTH_DAY
+      mul $t0, $t0, 4 #MAX_LENGTH_DAY
 
    # printing the event day question
       li $v0, 4
       la $a0, insert_eventDay
       syscall
 
-   # reading the event day as string
-      li $v0, 8
-      la $a0, eventsDay
-      add $a0, $a0, $t0
-      li $a1, 3 #MAX_LENGTH_DAY
+   # reading the event day as integer
+      li $v0, 5
       syscall
+      sw $v0, eventsDay($t0)
+      
 
-   # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
       lw $t0, eventCounter
@@ -188,10 +185,9 @@ print:
       syscall
 
       # Print event day
-      li $v0, 4
-      la $a0, eventsDay
-      mul $t2, $t0, 3 #MAX_LENGTH_DAY
-      add $a0, $a0, $t2
+      li $v0, 1
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+      lw $a0, eventsDay($t2)
       syscall
 
       # Print line break
