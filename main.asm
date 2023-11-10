@@ -35,6 +35,7 @@
       invalidAction: .asciiz "Invalid Action!\n"
       errorInput: .asciiz "Unable to insert :(\n"
       welcome: .asciiz "Welcome to AppointmentAgenda!\n"
+      notImplemented: .asciiz "Not implemented yet!\n"
 
       # line break
       lineBreak: .asciiz "\n"
@@ -81,9 +82,9 @@ insert:
       li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_DAY to get the correct position in the array
+   # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_DAY
+      mul $t0, $t0, 4
 
    # printing the event day question
       li $v0, 4
@@ -93,13 +94,8 @@ insert:
    # reading the event day as integer
       li $v0, 5
       syscall
-      sw $v0, eventsDay($t0)
-      
-
-
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
-      lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
+      j compare_day
+      day_insert:
 
 
    # printing the event start question
@@ -111,10 +107,6 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, eventsStartTime($t0)
-
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
-      lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
 
    # print line break
       li $v0, 4
@@ -144,18 +136,55 @@ insert:
       j loop_action
 
 
+compare_day:
+
+   # using auxCounter set to value 0
+   li $t1, 1
+   lw $t2, eventCounter
+
+   # compare if the day inserted already exists withing the eventsDay array
+   loop_compare_day:
+
+      # if auxCounter is equal to eventCounter, we have compared all days
+      bge $t1, $t2, exit_compare_day
+
+      # if the day inserted is equal to any day in the array, we need to print the errorInput message
+      mul $t3, $t1, 4 #MAX_LENGTH_DAY
+      lw $t4, eventsDay($t3)
+      beq $t4, $v0, errorInsert
+
+      # Increment auxCounter
+      addi $t1, $t1, 1
+   j loop_compare_day
+   
+   
+   exit_compare_day:
+   sw $v0, eventsDay($t0) #not equal to any event, so we can insert
+   j day_insert
+   
+   errorInsert:
+      li $v0, 4
+      la $a0, errorInput
+      syscall
+      
+       # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
+      
+      j loop_action
+
+
 # function of print all events
 print:
-    # using auxCounter set to value 0
+    # using auxCounter set to 1
     li $t0, 1
-    sw $t0, auxCounter
+    lw $t1, eventCounter
 
     # loop to print all information about events
     loop_print:
 
       # if auxCounter is equal to eventCounter, we have printed all events
-      lw $t0, auxCounter
-      lw $t1, eventCounter
       bge $t0, $t1, exit_print
 
       # Print text of event name
@@ -170,17 +199,17 @@ print:
       add $a0, $a0, $t2
       syscall
 
-      # Reset auxCounter to 1
-      lw $t0, auxCounter 
 
       # Print text of event day
       li $v0, 4
       la $a0, print_eventDay
       syscall
 
+      # We need to multiply the counter by 4 to get the correct position in the array
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+
       # Print event day
       li $v0, 1
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       lw $a0, eventsDay($t2)
       syscall
 
@@ -196,7 +225,6 @@ print:
 
       # Print event start time
       li $v0, 2
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       l.s $f12, eventsStartTime($t2)
       syscall
 
@@ -212,7 +240,6 @@ print:
 
       # Print event end time
       li $v0, 2
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       l.s $f12, eventsEndTime($t2)
       syscall
 
@@ -222,9 +249,7 @@ print:
       syscall
 
       # Increment auxCounter
-      lw $t0, auxCounter
       addi $t0, $t0, 1
-      sw $t0, auxCounter
 
       # Print line break
       li $v0, 4
@@ -240,10 +265,14 @@ print:
 
 # function to remove an event
 remove:
+    li $v0, 4
+    la $a0, notImplemented
     j loop_action
 
 # function to edit an event
 edit:
+    li $v0, 4
+    la $a0, notImplemented
     j loop_action
 
 main:
@@ -283,3 +312,4 @@ quit:
     # exit the program
     li $v0, 10
     syscall
+
