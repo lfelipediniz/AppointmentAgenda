@@ -93,8 +93,8 @@ insert:
    # reading the event day as integer
       li $v0, 5
       syscall
-      sw $v0, eventsDay($t0)
-      
+      j compare_day
+      day_inserted:
 
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
@@ -142,6 +142,39 @@ insert:
       sw $t0, eventCounter
 
       j loop_action
+
+
+compare_day:
+
+   # using auxCounter set to value 0
+    li $t1, 1
+    sw $t1, auxCounter
+
+   # compare if the day inserted already exists withing the eventsDay array
+   loop_compare_day:
+      # if auxCounter is equal to eventCounter, we have compared all days
+      lw $t1, auxCounter
+      lw $t4, eventCounter
+      bge $t1, $t4, exit_compare_day
+
+      # if the day inserted is equal to any day in the array, we need to print the errorInput message
+      
+      # event day
+      mul $t2, $t1, 4 #MAX_LENGTH_DAY
+      lw $t3, eventsDay($t2)
+      beq $t3, $v0, errorInsert
+   j loop_compare_day
+   
+   
+   exit_compare_day:
+   sw $v0, eventsDay($t0) #not equal to any event, so we can insert
+   j day_inserted
+   
+   errorInsert:
+      li $v0, 4
+      la $a0, errorInput
+      syscall
+      j insert
 
 
 # function of print all events
@@ -283,3 +316,4 @@ quit:
     # exit the program
     li $v0, 10
     syscall
+
