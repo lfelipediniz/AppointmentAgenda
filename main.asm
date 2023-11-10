@@ -7,27 +7,23 @@
       #strings
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
-      MAX_LENGTH_DAY: .word 4
-      MAX_LENGTH_HOUR: .word 4
 
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
-      # auxiliar counter
-      auxCounter: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
 
-   # events day array  with  MAX_LENGTH_DAY * MAX_EVENTS bytes
+   # events day array  with  4 * MAX_EVENTS bytes
    eventsDay: .space 400
 
-   # events start time hours array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   # events start time hours array with 4 * MAX_EVENTS bytes
    eventsStartTime: .space 400
 
-   # events end time minutes array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   # events end time minutes array with 4 * MAX_EVENTS bytes
    eventsEndTime: .space 400
 
    # strings returned to the user
@@ -121,6 +117,9 @@ insert:
    # reading the event end time as float
       li $v0, 6
       syscall
+      l.s $f12, eventsStartTime($t0)
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
       s.s $f0, eventsEndTime($t0)
 
    # print line break
@@ -158,21 +157,21 @@ compare_day:
    j loop_compare_day
    
    
-   exit_compare_day:
+exit_compare_day:
    sw $v0, eventsDay($t0) #not equal to any event, so we can insert
    j day_insert
    
-   errorInsert:
-      li $v0, 4
-      la $a0, errorInput
-      syscall
+errorInsert:
+   li $v0, 4
+   la $a0, errorInput
+   syscall
       
-       # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
+    # print line break
+   li $v0, 4
+   la $a0, lineBreak
+   syscall
       
-      j loop_action
+   j loop_action
 
 
 # function of print all events
