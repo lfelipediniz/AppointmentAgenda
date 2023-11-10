@@ -22,9 +22,7 @@
    eventsName: .space 5000
 
    # events day array  with  MAX_LENGTH_DAY * MAX_EVENTS bytes
-   eventsDay:
-         .alig 2
-         .space 400
+   eventsDay: .space 400
 
    # events start time hours array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
    eventsStartTime: .space 400
@@ -101,7 +99,7 @@ insert:
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
+      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
 
 
    # printing the event start question
@@ -109,16 +107,14 @@ insert:
       la $a0, insert_eventStartTime
       syscall
 
-   # reading the event start time as string
-      li $v0, 8
-      la $a0, eventsStartTime
-      add $a0, $a0, $t0
-      li $a1, 6 #MAX_LENGTH_HOUR
+   # reading the event start time as float
+      li $v0, 6
       syscall
+      s.s $f0, eventsStartTime($t0)
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 6 #MAX_LENGTH_HOUR
+      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
 
    # print line break
       li $v0, 4
@@ -130,19 +126,17 @@ insert:
       la $a0, insert_eventEndTime
       syscall
 
-   # reading the event end time as string
-      li $v0, 8
-      la $a0, eventsEndTime
-      add $a0, $a0, $t0
-      li $a1, 6 #MAX_LENGTH_HOUR
+   # reading the event end time as float
+      li $v0, 6
       syscall
+      s.s $f0, eventsEndTime($t0)
 
    # print line break
       li $v0, 4
       la $a0, lineBreak
       syscall
 
-   # incresse at one the eventCounter
+   # increase at one the eventCounter
       lw $t0, eventCounter
       addi $t0, $t0, 1
       sw $t0, eventCounter
@@ -201,10 +195,9 @@ print:
       syscall
 
       # Print event start time
-      li $v0, 4
-      la $a0, eventsStartTime
-      mul $t2, $t0, 6 #MAX_LENGTH_HOUR
-      add $a0, $a0, $t2
+      li $v0, 2
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+      l.s $f12, eventsStartTime($t2)
       syscall
 
       # Print line break
@@ -218,10 +211,9 @@ print:
       syscall
 
       # Print event end time
-      li $v0, 4
-      la $a0, eventsEndTime
-      mul $t2, $t0, 6 #MAX_LENGTH_HOUR
-      add $a0, $a0, $t2
+      li $v0, 2
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+      l.s $f12, eventsEndTime($t2)
       syscall
 
       # Print line break
