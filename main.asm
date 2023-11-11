@@ -7,27 +7,23 @@
       #strings
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
-      MAX_LENGTH_DAY: .word 4
-      MAX_LENGTH_HOUR: .word 4
 
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
-      # auxiliar counter
-      auxCounter: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
 
-   # events day array  with  MAX_LENGTH_DAY * MAX_EVENTS bytes
+   # events day array  with  4 * MAX_EVENTS bytes
    eventsDay: .space 400
 
-   # events start time hours array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   # events start time hours array with 4 * MAX_EVENTS bytes
    eventsStartTime: .space 400
 
-   # events end time minutes array with MAX_LENGTH_HOUR * MAX_EVENTS bytes
+   # events end time minutes array with 4 * MAX_EVENTS bytes
    eventsEndTime: .space 400
 
    # strings returned to the user
@@ -35,6 +31,7 @@
       invalidAction: .asciiz "Invalid Action!\n"
       errorInput: .asciiz "Unable to insert :(\n"
       welcome: .asciiz "Welcome to AppointmentAgenda!\n"
+      notImplemented: .asciiz "Not implemented yet!\n"
 
       # line break
       lineBreak: .asciiz "\n"
@@ -81,9 +78,9 @@ insert:
       li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_DAY to get the correct position in the array
+   # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
       lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_DAY
+      mul $t0, $t0, 4
 
    # printing the event day question
       li $v0, 4
@@ -94,13 +91,8 @@ insert:
       li $v0, 5
       syscall
       j compare_day
-      day_inserted:
-
-
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
-      lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
-
+      day_insert:
+      exit_sortArray:
 
    # printing the event start question
       li $v0, 4
@@ -111,10 +103,6 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, eventsStartTime($t0)
-
-   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_HOUR to get the correct position in the array
-      lw $t0, eventCounter
-      mul $t0, $t0, 4 #MAX_LENGTH_HOUR
 
    # print line break
       li $v0, 4
@@ -129,6 +117,9 @@ insert:
    # reading the event end time as float
       li $v0, 6
       syscall
+      l.s $f12, eventsStartTime($t0)
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
       s.s $f0, eventsEndTime($t0)
 
    # print line break
@@ -146,49 +137,87 @@ insert:
 
 compare_day:
 
-   # using auxCounter set to value 0
-    li $t1, 1
-    sw $t1, auxCounter
+   # using auxCounter set to value 1
+   li $t1, 1
+   lw $t2, eventCounter
 
    # compare if the day inserted already exists withing the eventsDay array
    loop_compare_day:
-      # if auxCounter is equal to eventCounter, we have compared all days
-      lw $t1, auxCounter
-      lw $t4, eventCounter
-      bge $t1, $t4, exit_compare_day
+
+      # if auxCounter is equal to eventCounter, we have compared all days, the value inserted is the biggest
+      bge $t1, $t2, exit_compare_day
 
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
+      mul $t3, $t1, 4 #MAX_LENGTH_DAY
+      lw $t4, eventsDay($t3)
+      beq $t4, $v0, errorInsert
+
+      # if the day inserted is less than any day in the array, we need to insert it in actual position
+      blt $v0, $t4, sortArray
+
       
-      # event day
-      mul $t2, $t1, 4 #MAX_LENGTH_DAY
-      lw $t3, eventsDay($t2)
-      beq $t3, $v0, errorInsert
+      # Increment auxCounter
+      addi $t1, $t1, 1
    j loop_compare_day
    
+
+sortArray:
+   sw $v0, eventsDay($t3) # store day inserted in the array
    
-   exit_compare_day:
-   sw $v0, eventsDay($t0) #not equal to any event, so we can insert
-   j day_inserted
+   loop_sortArray:
+   # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
+
    
-   errorInsert:
-      li $v0, 4
-      la $a0, errorInput
-      syscall
-      j insert
+   beq $t1, $t2, exit_sortArray # if auxCounter is equal to eventCounter, the array is sorted
+   addi $t1, $t1, 1 # Increment auxCounter($t1)
+   mul $t3, $t1, 4 # position in the array, auxCounter * 4
+   lw $t5, eventsDay($t3) # day in the array
+   sw $t4, eventsDay($t3) # store day in the array in $t4
+   move $t4, $t5 # move day in the array to $t4
+
+   l.s $f0, eventsStartTime($t3) # start time in the array
+   s.s $f1, eventsStartTime($t3) # store start time in the array in $f1
+   mov.s $f1, $f0 # move start time in the array to $f1
+
+   l.s $f2, eventsEndTime($t3) # end time in the array
+   s.s $f3, eventsEndTime($t3) # store end time in the array in $f3
+   mov.s $f3, $f2 # move end time in the array to $f3
+
+#   mul $t3, $t1, 50 # position in the array, auxCounter * 50 (MAX_LENGTH_EVENT_NAME)
+ #  lw $t6, eventsName($t3) # event name in the array
+  # sw $t7, eventsName($t3) # store event name in the array in $t4
+   #move $t7, $t6 # move event name in the array to $t4
+   
+   j loop_sortArray
+
+
+exit_compare_day:
+   sw $v0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
+   j day_insert
+   
+errorInsert:
+   li $v0, 4
+   la $a0, errorInput
+   syscall
+      
+    # print line break
+   li $v0, 4
+   la $a0, lineBreak
+   syscall
+      
+   j loop_action
 
 
 # function of print all events
 print:
-    # using auxCounter set to value 0
+    # using auxCounter set to 1
     li $t0, 1
-    sw $t0, auxCounter
+    lw $t1, eventCounter
 
     # loop to print all information about events
     loop_print:
 
       # if auxCounter is equal to eventCounter, we have printed all events
-      lw $t0, auxCounter
-      lw $t1, eventCounter
       bge $t0, $t1, exit_print
 
       # Print text of event name
@@ -203,17 +232,17 @@ print:
       add $a0, $a0, $t2
       syscall
 
-      # Reset auxCounter to 1
-      lw $t0, auxCounter 
 
       # Print text of event day
       li $v0, 4
       la $a0, print_eventDay
       syscall
 
+      # We need to multiply the counter by 4 to get the correct position in the array
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+
       # Print event day
       li $v0, 1
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       lw $a0, eventsDay($t2)
       syscall
 
@@ -229,7 +258,6 @@ print:
 
       # Print event start time
       li $v0, 2
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       l.s $f12, eventsStartTime($t2)
       syscall
 
@@ -245,7 +273,6 @@ print:
 
       # Print event end time
       li $v0, 2
-      mul $t2, $t0, 4 #MAX_LENGTH_DAY
       l.s $f12, eventsEndTime($t2)
       syscall
 
@@ -255,9 +282,7 @@ print:
       syscall
 
       # Increment auxCounter
-      lw $t0, auxCounter
       addi $t0, $t0, 1
-      sw $t0, auxCounter
 
       # Print line break
       li $v0, 4
@@ -273,10 +298,14 @@ print:
 
 # function to remove an event
 remove:
+    li $v0, 4
+    la $a0, notImplemented
     j loop_action
 
 # function to edit an event
 edit:
+    li $v0, 4
+    la $a0, notImplemented
     j loop_action
 
 main:
