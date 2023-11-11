@@ -90,9 +90,7 @@ insert:
    # reading the event day as integer
       li $v0, 5
       syscall
-      j compare_day
-      day_insert:
-      exit_sortArray:
+      move $s0, $v0
 
    # printing the event start question
       li $v0, 4
@@ -103,11 +101,6 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, eventsStartTime($t0)
-
-   # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
 
    # print event end time
       li $v0, 4
@@ -122,10 +115,10 @@ insert:
       bc1t errorInsert   # if true, print error message
       s.s $f0, eventsEndTime($t0)
 
-   # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
+
+      j compare_day
+      day_insert:
+      exit_sortArray:
 
    # increase at one the eventCounter
       lw $t0, eventCounter
@@ -150,10 +143,10 @@ compare_day:
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       lw $t4, eventsDay($t3)
-      beq $t4, $v0, errorInsert
+      beq $t4, $s0, errorInsert
 
       # if the day inserted is less than any day in the array, we need to insert it in actual position
-      blt $v0, $t4, sortArray
+      blt $s0, $t4, sortArray
 
       
       # Increment auxCounter
@@ -162,7 +155,7 @@ compare_day:
    
 
 sortArray:
-   sw $v0, eventsDay($t3) # store day inserted in the array
+   sw $s0, eventsDay($t3) # store day inserted in the array
    
    loop_sortArray:
    # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
@@ -180,7 +173,7 @@ sortArray:
 
 
 exit_compare_day:
-   sw $v0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
+   sw $s0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
    j day_insert
    
 errorInsert:
@@ -288,12 +281,14 @@ print:
 remove:
     li $v0, 4
     la $a0, notImplemented
+    syscall
     j loop_action
 
 # function to edit an event
 edit:
     li $v0, 4
     la $a0, notImplemented
+    syscall
     j loop_action
 
 main:
@@ -333,4 +328,3 @@ quit:
     # exit the program
     li $v0, 10
     syscall
-
