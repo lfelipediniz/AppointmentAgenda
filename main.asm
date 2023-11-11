@@ -116,7 +116,9 @@ insert:
       s.s $f0, eventsEndTime($t0)
 
 
-      j compare_day
+      j compareDay
+
+      
       day_insert:
       exit_sortArray:
 
@@ -128,17 +130,17 @@ insert:
       j loop_action
 
 
-compare_day:
+compareDay:
 
    # using auxCounter set to value 1
    li $t1, 1
    lw $t2, eventCounter
 
    # compare if the day inserted already exists withing the eventsDay array
-   loop_compare_day:
+   loop_compareDay:
 
       # if auxCounter is equal to eventCounter, we have compared all days, the value inserted is the biggest
-      bge $t1, $t2, exit_compare_day
+      bge $t1, $t2, exit_compareDay
 
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
@@ -151,7 +153,7 @@ compare_day:
       
       # Increment auxCounter
       addi $t1, $t1, 1
-   j loop_compare_day
+   j loop_compareDay
    
 
 sortArray:
@@ -172,7 +174,7 @@ sortArray:
    j loop_sortArray
 
 
-exit_compare_day:
+exit_compareDay:
    sw $s0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
    j day_insert
    
@@ -181,7 +183,7 @@ errorInsert:
    la $a0, errorInput
    syscall
       
-    # print line break
+   # print line break
    li $v0, 4
    la $a0, lineBreak
    syscall
