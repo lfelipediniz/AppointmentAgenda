@@ -175,18 +175,6 @@ sortArray:
    sw $t4, eventsDay($t3) # store day in the array in $t4
    move $t4, $t5 # move day in the array to $t4
 
-   l.s $f0, eventsStartTime($t3) # start time in the array
-   s.s $f1, eventsStartTime($t3) # store start time in the array in $f1
-   mov.s $f1, $f0 # move start time in the array to $f1
-
-   l.s $f2, eventsEndTime($t3) # end time in the array
-   s.s $f3, eventsEndTime($t3) # store end time in the array in $f3
-   mov.s $f3, $f2 # move end time in the array to $f3
-
-#   mul $t3, $t1, 50 # position in the array, auxCounter * 50 (MAX_LENGTH_EVENT_NAME)
- #  lw $t6, eventsName($t3) # event name in the array
-  # sw $t7, eventsName($t3) # store event name in the array in $t4
-   #move $t7, $t6 # move event name in the array to $t4
    
    j loop_sortArray
 
