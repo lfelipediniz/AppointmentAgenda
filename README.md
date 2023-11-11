@@ -49,6 +49,5 @@ To run our code, open it in the **Mars** program. After opening it, press the F3
 | :---------------------------| ---------- |
 | Luiz Felipe Diniz Costa     | 13782032   |
 | Rafael Jun Morita           | 10845040   |
-| Pedro Vinícius Cruz         | 14139115   |
 
 Project for the course ["Computer Organization and Architecture"](https://uspdigital.usp.br/jupiterweb/obterDisciplina?sgldis=SSC0902) at the Institute of Mathematics and Computer Science, University of Sao Paulo
