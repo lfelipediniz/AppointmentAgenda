@@ -170,43 +170,57 @@ compareHour:
    la $a0, lineBreak
    syscall
 
-   # already inserted
-   # Print event start time
-   li $v0, 2
-   l.s $f12, eventsStartTime($t3)
-   syscall
+   # debug
+      # # already inserted
+      # # Print event start time
+      # li $v0, 2
+      # l.s $f12, eventsStartTime($t3)
+      # syscall
 
-   # Print event end time
-   li $v0, 2
-   l.s $f12, eventsEndTime($t3)
-   syscall
+      # # Print event end time
+      # li $v0, 2
+      # l.s $f12, eventsEndTime($t3)
+      # syscall
 
+      # mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+
+      # #inserted now
+      # # Print event start time
+      # li $v0, 2
+      # l.s $f12, eventsStartTime($t5)
+      # syscall
+
+      # # Print event end time
+      # li $v0, 2
+      # l.s $f12, eventsEndTime($t5)
+      # syscall
+
+      # Print line break
+         # li $v0, 4
+         # la $a0, lineBreak
+
+
+   
+   
    mul $t5, $t2, 4 #MAX_LENGTH_HOUR
 
-   #inserted now
-   # Print event start time
-   li $v0, 2
-   l.s $f12, eventsStartTime($t5)
-   syscall
+   # store the start time and end time of the event inserted confliction and atual event
+   l.s $f13, eventsStartTime($t3)
+   l.s $f14, eventsEndTime($t3)
+   l.s $f15, eventsStartTime($t5)
+   l.s $f16, eventsEndTime($t5)
 
-   # Print event end time
-   li $v0, 2
-   l.s $f12, eventsEndTime($t5)
-   syscall
+   # if (f13 <= f16 && f14 >= f15) : errorInsert
+   c.le.s $f13, $f16
+   bc1t errorInsert
+   c.ge.s $f14, $f15
+   bc1t errorInsert
 
-   
-
-
-
-   
-   # # if f12 <= f18 and f12 >= f16) or (f16 <= f14 and f18 >= f12)
-   # c.le.s $f12, $f18
-   # c.le.s $f16, $f14
-   # bc1t errorInsert
-
-   # c.le.s $f16, $f14
-   # c.le.s $f12, $f18
-   # bc1t errorInsert
+   #if (f15 <= f14 && f16 >= f13) : errorInsert
+   c.le.s $f15, $f14
+   bc1t errorInsert
+   c.ge.s $f16, $f13
+   bc1t errorInsert
 
    j exit_compareHour
 
