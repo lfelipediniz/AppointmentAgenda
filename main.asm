@@ -13,8 +13,6 @@
       action: .word 0
       # counter of events
       eventCounter: .word 1
-      # bool comparing if the day inserted already exists
-      dayExists: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
@@ -147,7 +145,7 @@ compareDay:
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       lw $t4, eventsDay($t3)
-      beq $t4, $s0, dayEqual
+      beq $t4, $s0, compareHour
 
       exit_compareHour:
 
@@ -161,29 +159,27 @@ compareDay:
 
 
 compareHour:
-   # add on float registrator startTime and endTime
-   l.s $f12, eventsStartTime($t3) # startTime equal day
-   l.s $f14, eventsEndTime($t3) # endTime equal day
 
-   # storage event counter in $t2
-   lw $t2, eventCounter
+# print error message
+   li $v0, 4
+   la $a0, errorInput
+   syscall
 
-   # add on float registrator startTime and endTime of the event inserted
-   l.s $f16, eventsStartTime($t2) 
-   l.s $f18, eventsEndTime($t2) 
+   # print line break
+   li $v0, 4
+   la $a0, lineBreak
+   syscall
 
-   # if f12 <= f18 and f12 >= f16) or (f16 <= f14 and f18 >= f12)
-   c.le.s $f12, $f18
-   c.le.s $f16, $f14
-   bc1t errorInsert
+   
+   
+   # # if f12 <= f18 and f12 >= f16) or (f16 <= f14 and f18 >= f12)
+   # c.le.s $f12, $f18
+   # c.le.s $f16, $f14
+   # bc1t errorInsert
 
-   c.le.s $f16, $f14
-   c.le.s $f12, $f18
-   bc1t errorInsert
-
-   # set dayExists to 0
-   li $t0, 0
-   sw $t0, dayExists
+   # c.le.s $f16, $f14
+   # c.le.s $f12, $f18
+   # bc1t errorInsert
 
    j exit_compareHour
 
@@ -220,13 +216,6 @@ errorInsert:
    syscall
       
    j loop_action
-
-dayEqual:
-   # set dayExists to 1
-   li $t0, 1
-   sw $t0, dayExists
-
-   j compareHour  
 
 
 # function of print all events
