@@ -180,7 +180,7 @@ compareHour:
     c.eq.s $f16, $f13   # if f16 == f13
     bc1t exit_compareHour           
 
-    c.eq.s $f13, $f15   # if f13 == f15
+    c.eq.s $f14, $f15   # if f14 == f15
     bc1t errorInsert         
 
     c.eq.s $f16, $f13   # if f16 == f13
