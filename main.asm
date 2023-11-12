@@ -149,6 +149,8 @@ compareDay:
       lw $t4, eventsDay($t3)
       beq $t4, $s0, dayEqual
 
+      exit_compareHour:
+
       # if the day inserted is less than any day in the array, we need to insert it in actual position
       blt $s0, $t4, sortArray
 
@@ -156,7 +158,34 @@ compareDay:
       # Increment auxCounter
       addi $t1, $t1, 1
    j loop_compareDay
-   
+
+
+compareHour:
+   # add on float registrator startTime and endTime
+   l.s $f12, eventsStartTime($t3) # startTime equal day
+   l.s $f14, eventsEndTime($t3) # endTime equal day
+
+   # storage event counter in $t2
+   lw $t2, eventCounter
+
+   # add on float registrator startTime and endTime of the event inserted
+   l.s $f16, eventsStartTime($t2) 
+   l.s $f18, eventsEndTime($t2) 
+
+   # if f12 <= f18 and f12 >= f16) or (f16 <= f14 and f18 >= f12)
+   c.le.s $f12, $f18
+   c.le.s $f16, $f14
+   bc1t errorInsert
+
+   c.le.s $f16, $f14
+   c.le.s $f12, $f18
+   bc1t errorInsert
+
+   # set dayExists to 0
+   li $t0, 0
+   sw $t0, dayExists
+
+   j exit_compareHour
 
 sortArray:
    sw $s0, eventsDay($t3) # store day inserted in the array
@@ -196,8 +225,8 @@ dayEqual:
    # set dayExists to 1
    li $t0, 1
    sw $t0, dayExists
-      
-   j errorInsert
+
+   j compareHour  
 
 
 # function of print all events
