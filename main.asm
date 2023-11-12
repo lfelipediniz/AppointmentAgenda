@@ -13,6 +13,8 @@
       action: .word 0
       # counter of events
       eventCounter: .word 1
+      # bool comparing if the day inserted already exists
+      dayExists: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
@@ -145,7 +147,7 @@ compareDay:
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       lw $t4, eventsDay($t3)
-      beq $t4, $s0, errorInsert
+      beq $t4, $s0, dayEqual
 
       # if the day inserted is less than any day in the array, we need to insert it in actual position
       blt $s0, $t4, sortArray
@@ -189,6 +191,13 @@ errorInsert:
    syscall
       
    j loop_action
+
+dayEqual:
+   # set dayExists to 1
+   li $t0, 1
+   sw $t0, dayExists
+      
+   j errorInsert
 
 
 # function of print all events
