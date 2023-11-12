@@ -90,6 +90,7 @@ insert:
    # reading the event day as integer
       li $v0, 5
       syscall
+      sw $v0, eventsDay($t0)
       move $s0, $v0
 
    # printing the event start question
@@ -101,6 +102,8 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, eventsStartTime($t0)
+
+      mov.s $f19, $f0 # store the event start time in $f19
 
    # print event end time
       li $v0, 4
@@ -115,12 +118,11 @@ insert:
       bc1t errorInsert   # if true, print error message
       s.s $f0, eventsEndTime($t0)
 
+      mov.s $f20, $f0 # store the event end time in $f20
 
       j compareDay
 
-      
-      day_insert:
-      exit_sortArray:
+      exit_verify:
 
    # increase at one the eventCounter
       lw $t0, eventCounter
@@ -140,7 +142,7 @@ compareDay:
    loop_compareDay:
 
       # if auxCounter is equal to eventCounter, we have compared all days, the value inserted is the biggest
-      bge $t1, $t2, exit_compareDay
+      bge $t1, $t2, exit_verify
 
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
@@ -191,25 +193,26 @@ compareHour:
 
 sortArray:
    sw $s0, eventsDay($t3) # store day inserted in the array
-   
+
+   addi $t0, $t0, 1 # increment eventCounter
    loop_sortArray:
 
    # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
-   beq $t1, $t2, exit_sortArray # if auxCounter is equal to eventCounter, the array is sorted
+   beq $t1, $t2, exit_verify # if auxCounter is equal to eventCounter, the array is sorted
    addi $t1, $t1, 1 # Increment auxCounter($t1)
+
    mul $t3, $t1, 4 # position in the array, auxCounter * 4
+
+   # compare if the day inserted is less than any day in the array
    lw $t5, eventsDay($t3) # day in the array
    sw $t4, eventsDay($t3) # store day in the array in $t4
    move $t4, $t5 # move day in the array to $t4
 
-   
+   # sort other arrays with the same position of the day in the array
+
+
    j loop_sortArray
 
-
-exit_compareDay:
-   sw $s0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
-   j day_insert
-   
 errorInsert:
    li $v0, 4
    la $a0, errorInput
