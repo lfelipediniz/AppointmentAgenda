@@ -159,46 +159,6 @@ compareDay:
 
 
 compareHour:
-
-  # print error message
-  li $v0, 4
-  la $a0, errorInput
-  syscall
-
-  # print line break
-  li $v0, 4
-  la $a0, lineBreak
-  syscall
-
-  # debug
-  # # already inserted
-  # # Print event start time
-  # li $v0, 2
-  # l.s $f12, eventsStartTime($t3)
-  # syscall
-
-  # # Print event end time
-  # li $v0, 2
-  # l.s $f12, eventsEndTime($t3)
-  # syscall
-
-  # mul $t5, $t2, 4 #MAX_LENGTH_HOUR
-
-  # #inserted now
-  # # Print event start time
-  # li $v0, 2
-  # l.s $f12, eventsStartTime($t5)
-  # syscall
-
-  # # Print event end time
-  # li $v0, 2
-  # l.s $f12, eventsEndTime($t5)
-  # syscall
-
-  # Print line break
-  # li $v0, 4
-  # la $a0, lineBreak
-
   mul $t5, $t2, 4 #MAX_LENGTH_HOUR
 
   # store the start time and end time of the event inserted confliction and atual event
@@ -207,28 +167,34 @@ compareHour:
   l.s $f15, eventsStartTime($t5)
   l.s $f16, eventsEndTime($t5)
 
-  # if (f13 <= f16 && f14 >= f15) : errorInsert
-  c.le.s $f13, $f16
-  bc1t errorInsert
-  c.le.s $f14, $f15
-  bc1t errorInsert
+    # verify if the event inserted confliction with the atual event
+    c.lt.s $f14, $f15   # if f14 < f15
+    bc1t exit_compareHour        
 
-  #if (f15 <= f14 && f16 >= f13) : errorInsert
-  c.le.s $f15, $f14
-  bc1t errorInsert
-  c.le.s $f16, $f13
-  bc1t errorInsert
+    c.eq.s $f14, $f15   # if f14 == f15
+    bc1t exit_compareHour          
 
-  j exit_compareHour
+    c.lt.s $f16, $f13   # if f16 < f13
+    bc1t exit_compareHour          
+
+    c.eq.s $f16, $f13   # if f16 == f13
+    bc1t exit_compareHour           
+
+    c.eq.s $f13, $f15   # if f13 == f15
+    bc1t errorInsert         
+
+    c.eq.s $f16, $f13   # if f16 == f13
+    bc1t errorInsert         
+
+    j errorInsert  # after all comparisons, we need to print the errorInput message
 
 
 sortArray:
    sw $s0, eventsDay($t3) # store day inserted in the array
    
    loop_sortArray:
-   # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
 
-   
+   # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
    beq $t1, $t2, exit_sortArray # if auxCounter is equal to eventCounter, the array is sorted
    addi $t1, $t1, 1 # Increment auxCounter($t1)
    mul $t3, $t1, 4 # position in the array, auxCounter * 4
