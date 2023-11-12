@@ -170,7 +170,34 @@ compareHour:
    la $a0, lineBreak
    syscall
 
+   # already inserted
+   # Print event start time
+   li $v0, 2
+   l.s $f12, eventsStartTime($t3)
+   syscall
+
+   # Print event end time
+   li $v0, 2
+   l.s $f12, eventsEndTime($t3)
+   syscall
+
+   mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+
+   #inserted now
+   # Print event start time
+   li $v0, 2
+   l.s $f12, eventsStartTime($t5)
+   syscall
+
+   # Print event end time
+   li $v0, 2
+   l.s $f12, eventsEndTime($t5)
+   syscall
+
    
+
+
+
    
    # # if f12 <= f18 and f12 >= f16) or (f16 <= f14 and f18 >= f12)
    # c.le.s $f12, $f18
