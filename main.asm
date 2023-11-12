@@ -203,8 +203,8 @@ sortArray:
    s.s $f12, eventsStartTime($t3)
 
    # store end time inserted in the array
-   l.s $f12, aux_eventEndTime
-   s.s $f12, eventsEndTime($t3)
+   l.s $f13, aux_eventEndTime
+   s.s $f13, eventsEndTime($t3)
    
    loop_sortArray:
 
@@ -219,14 +219,14 @@ sortArray:
    move $t4, $t5 # move day in the array to $t4
 
    # event start time in the array sorted
-   l.s $f13, eventsStartTime($t3) # start time in the array
-   s.s $f12, eventsStartTime($t3) # store start time in the array in $f12
-   mov.s $f12, $f13 # move start time in the array to $f12
+   l.s $f15, eventsStartTime($t3) # start time in the array
+   s.s $f14, eventsStartTime($t3) # store start time in the array in $f12
+   mov.s $f14, $f15 # move start time in the array to $f12
 
    # event end time in the array sorted
-   l.s $f13, eventsEndTime($t3) # end time in the array
-   s.s $f12, eventsEndTime($t3) # store end time in the array in $f12
-   mov.s $f12, $f13 # move end time in the array to $f12
+   l.s $f17, eventsEndTime($t3) # end time in the array
+   s.s $f16, eventsEndTime($t3) # store end time in the array in $f12
+   mov.s $f16, $f17 # move end time in the array to $f12
 
 
    j loop_sortArray
@@ -243,8 +243,8 @@ exit_compareDay:
    s.s $f12, eventsStartTime($t0)
 
    # event end time in the array sorted
-   l.s $f12, aux_eventEndTime
-   s.s $f12, eventsEndTime($t0)
+   l.s $f13, aux_eventEndTime
+   s.s $f13, eventsEndTime($t0)
 
    j day_insert
    
