@@ -90,9 +90,7 @@ insert:
    # reading the event day as integer
       li $v0, 5
       syscall
-      j compare_day
-      day_insert:
-
+      move $s0, $v0
 
    # printing the event start question
       li $v0, 4
@@ -103,11 +101,6 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, eventsStartTime($t0)
-
-   # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
 
    # print event end time
       li $v0, 4
@@ -122,10 +115,12 @@ insert:
       bc1t errorInsert   # if true, print error message
       s.s $f0, eventsEndTime($t0)
 
-   # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
+
+      j compareDay
+
+      
+      day_insert:
+      exit_sortArray:
 
    # increase at one the eventCounter
       lw $t0, eventCounter
@@ -135,30 +130,84 @@ insert:
       j loop_action
 
 
-compare_day:
+compareDay:
 
-   # using auxCounter set to value 0
+   # using auxCounter set to value 1
    li $t1, 1
    lw $t2, eventCounter
 
    # compare if the day inserted already exists withing the eventsDay array
-   loop_compare_day:
+   loop_compareDay:
 
-      # if auxCounter is equal to eventCounter, we have compared all days
-      bge $t1, $t2, exit_compare_day
+      # if auxCounter is equal to eventCounter, we have compared all days, the value inserted is the biggest
+      bge $t1, $t2, exit_compareDay
 
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       lw $t4, eventsDay($t3)
-      beq $t4, $v0, errorInsert
+      beq $t4, $s0, compareHour
 
+      exit_compareHour:
+
+      # if the day inserted is less than any day in the array, we need to insert it in actual position
+      blt $s0, $t4, sortArray
+
+      
       # Increment auxCounter
       addi $t1, $t1, 1
-   j loop_compare_day
+   j loop_compareDay
+
+
+compareHour:
+  mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+
+  # store the start time and end time of the event inserted confliction and atual event
+  l.s $f13, eventsStartTime($t3)
+  l.s $f14, eventsEndTime($t3)
+  l.s $f15, eventsStartTime($t5)
+  l.s $f16, eventsEndTime($t5)
+
+    # verify if the event inserted confliction with the atual event
+    c.lt.s $f14, $f15   # if f14 < f15
+    bc1t exit_compareHour        
+
+    c.eq.s $f14, $f15   # if f14 == f15
+    bc1t exit_compareHour          
+
+    c.lt.s $f16, $f13   # if f16 < f13
+    bc1t exit_compareHour          
+
+    c.eq.s $f16, $f13   # if f16 == f13
+    bc1t exit_compareHour           
+
+    c.eq.s $f13, $f15   # if f13 == f15
+    bc1t errorInsert         
+
+    c.eq.s $f16, $f13   # if f16 == f13
+    bc1t errorInsert         
+
+    j errorInsert  # after all comparisons, we need to print the errorInput message
+
+
+sortArray:
+   sw $s0, eventsDay($t3) # store day inserted in the array
    
+   loop_sortArray:
+
+   # $t1=auxCounter, $t2=eventCounter, $t3=position in the array, $t4=day in the array
+   beq $t1, $t2, exit_sortArray # if auxCounter is equal to eventCounter, the array is sorted
+   addi $t1, $t1, 1 # Increment auxCounter($t1)
+   mul $t3, $t1, 4 # position in the array, auxCounter * 4
+   lw $t5, eventsDay($t3) # day in the array
+   sw $t4, eventsDay($t3) # store day in the array in $t4
+   move $t4, $t5 # move day in the array to $t4
+
    
-exit_compare_day:
-   sw $v0, eventsDay($t0) #not equal to any event, so we can insert
+   j loop_sortArray
+
+
+exit_compareDay:
+   sw $s0, eventsDay($t0) # day greater than any event, so we can insert it in the end of the array
    j day_insert
    
 errorInsert:
@@ -166,7 +215,7 @@ errorInsert:
    la $a0, errorInput
    syscall
       
-    # print line break
+   # print line break
    li $v0, 4
    la $a0, lineBreak
    syscall
@@ -266,12 +315,14 @@ print:
 remove:
     li $v0, 4
     la $a0, notImplemented
+    syscall
     j loop_action
 
 # function to edit an event
 edit:
     li $v0, 4
     la $a0, notImplemented
+    syscall
     j loop_action
 
 main:
@@ -311,4 +362,3 @@ quit:
     # exit the program
     li $v0, 10
     syscall
-
