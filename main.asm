@@ -160,69 +160,67 @@ compareDay:
 
 compareHour:
 
-# print error message
-   li $v0, 4
-   la $a0, errorInput
-   syscall
+  # print error message
+  li $v0, 4
+  la $a0, errorInput
+  syscall
 
-   # print line break
-   li $v0, 4
-   la $a0, lineBreak
-   syscall
+  # print line break
+  li $v0, 4
+  la $a0, lineBreak
+  syscall
 
-   # debug
-      # # already inserted
-      # # Print event start time
-      # li $v0, 2
-      # l.s $f12, eventsStartTime($t3)
-      # syscall
+  # debug
+  # # already inserted
+  # # Print event start time
+  # li $v0, 2
+  # l.s $f12, eventsStartTime($t3)
+  # syscall
 
-      # # Print event end time
-      # li $v0, 2
-      # l.s $f12, eventsEndTime($t3)
-      # syscall
+  # # Print event end time
+  # li $v0, 2
+  # l.s $f12, eventsEndTime($t3)
+  # syscall
 
-      # mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+  # mul $t5, $t2, 4 #MAX_LENGTH_HOUR
 
-      # #inserted now
-      # # Print event start time
-      # li $v0, 2
-      # l.s $f12, eventsStartTime($t5)
-      # syscall
+  # #inserted now
+  # # Print event start time
+  # li $v0, 2
+  # l.s $f12, eventsStartTime($t5)
+  # syscall
 
-      # # Print event end time
-      # li $v0, 2
-      # l.s $f12, eventsEndTime($t5)
-      # syscall
+  # # Print event end time
+  # li $v0, 2
+  # l.s $f12, eventsEndTime($t5)
+  # syscall
 
-      # Print line break
-         # li $v0, 4
-         # la $a0, lineBreak
+  # Print line break
+  # li $v0, 4
+  # la $a0, lineBreak
 
+  mul $t5, $t2, 4 #MAX_LENGTH_HOUR
 
-   
-   
-   mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+  # store the start time and end time of the event inserted confliction and atual event
+  l.s $f13, eventsStartTime($t3)
+  l.s $f14, eventsEndTime($t3)
+  l.s $f15, eventsStartTime($t5)
+  l.s $f16, eventsEndTime($t5)
 
-   # store the start time and end time of the event inserted confliction and atual event
-   l.s $f13, eventsStartTime($t3)
-   l.s $f14, eventsEndTime($t3)
-   l.s $f15, eventsStartTime($t5)
-   l.s $f16, eventsEndTime($t5)
+  # if (f13 <= f16 && f14 >= f15) : errorInsert
+  c.le.s $f13, $f16
+  bc1t errorInsert
+  c.le.s $f14, $f15
+  bc1t errorInsert
 
-   # if (f13 <= f16 && f14 >= f15) : errorInsert
-   c.le.s $f13, $f16
-   bc1t errorInsert
-   c.ge.s $f14, $f15
-   bc1t errorInsert
+  #if (f15 <= f14 && f16 >= f13) : errorInsert
+  c.le.s $f15, $f14
+  bc1t errorInsert
+  c.le.s $f16, $f13
+  bc1t errorInsert
 
-   #if (f15 <= f14 && f16 >= f13) : errorInsert
-   c.le.s $f15, $f14
-   bc1t errorInsert
-   c.ge.s $f16, $f13
-   bc1t errorInsert
+  j exit_compareHour
 
-   j exit_compareHour
 
 sortArray:
    sw $s0, eventsDay($t3) # store day inserted in the array
