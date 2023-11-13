@@ -7,6 +7,8 @@
       #strings
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
+      MIN_HOUR: .float 0.0
+      MAX_HOUR: .float 23.59
 
    #variables
       #action inserted by the user
@@ -33,7 +35,7 @@
    # strings returned to the user
       actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
       invalidAction: .asciiz "Invalid Action!\n"
-      errorInput: .asciiz "Unable to insert :(\n"
+      errorInput: .asciiz "\nUnable to insert :(\n"
       welcome: .asciiz "Welcome to AppointmentAgenda!\n"
       notImplemented: .asciiz "Not implemented yet!\n"
 
@@ -106,6 +108,18 @@ insert:
       syscall
       s.s $f0, aux_eventStartTime
 
+   # verify if is a valid hour
+
+      # if the hour is less than 0, we need to print the errorInput message
+      l.s $f12, MIN_HOUR
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
+
+      # if the hour is greater than 23.59, we need to print the errorInput message
+      l.s $f12, MAX_HOUR
+      c.lt.s $f12, $f0   # Compare if $f12 less than $f0
+      bc1t errorInsert   # if true, print error message
+
    # print event end time
       li $v0, 4
       la $a0, insert_eventEndTime
@@ -114,14 +128,26 @@ insert:
    # reading the event end time as float
       li $v0, 6
       syscall
+      s.s $f0, aux_eventEndTime
+
+   # verify if is a valid hour
+
+      # if the hour is less than 0, we need to print the errorInput message
+      l.s $f12, MIN_HOUR
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
+
+      # if the hour is greater than 23.59, we need to print the errorInput message
+      l.s $f12, MAX_HOUR
+      c.lt.s $f12, $f0   # Compare if $f12 less than $f0
+      bc1t errorInsert   # if true, print error message
+      
+      # if the hour is less than the start time, we need to print the errorInput message
       l.s $f12, aux_eventStartTime
       c.lt.s $f0, $f12   # Compare if $f0 less than $f12
       bc1t errorInsert   # if true, print error message
-      s.s $f0, aux_eventEndTime
-
 
       j compareDay
-
       
       day_insert:
       exit_sortArray:
