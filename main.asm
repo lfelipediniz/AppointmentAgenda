@@ -149,6 +149,8 @@ compareDay:
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       lw $t4, eventsDay($t3)
+      l.s $f14, eventsStartTime($t3)
+      l.s $f16, eventsEndTime($t3)
       beq $t4, $s0, compareHour
 
       exit_compareHour:
