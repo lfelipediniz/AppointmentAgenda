@@ -152,10 +152,25 @@ insert:
          # subtract the integer value of the original value, f0 = f0 - f15
          sub.s $f0, $f0, $f15
 
-         # if the value of f0 is greater than 0.59, we need to print the errorInput message
-         l.s $f12, MAX_MINUTES
-         c.lt.s $f12, $f0   # Compare if $f12 less than $f0
-         bc1t errorInsert   # if true, print error message               
+         # print the value of f0 (debug)
+         li $v0, 2            
+         mov.s $f12, $f0      
+         syscall               
+
+
+
+
+
+
+
+      
+
+
+
+
+
+
+
 
 
    # print event end time
@@ -184,28 +199,6 @@ insert:
       l.s $f12, aux_eventStartTime
       c.lt.s $f0, $f12 # Compare if $f0 less than $f12
       bc1t errorInsert  # if true, print error message
-
-      # for minutes greater than 59, we need to print the errorInput message
-         # aux_startTime to f0
-         l.s $f0, aux_eventEndTime
-
-         # Convert float to integer (truncate)
-         trunc.w.s $f4, $f0 
-
-         # move the integer part to an integer register $t0
-         mfc1 $t0, $f4
-
-         # Convert integer to float
-         mtc1 $t0, $f15    # move the integer part to a float register $f15
-         cvt.s.w $f15, $f15 # convert the integer part to a float
-
-         # subtract the integer value of the original value, f0 = f0 - f15
-         sub.s $f0, $f0, $f15
-
-         # if the value of f0 is greater than 0.59, we need to print the errorInput message
-         l.s $f12, MAX_MINUTES
-         c.lt.s $f12, $f0   # Compare if $f12 less than $f0
-         bc1t errorInsert   # if true, print error message    
 
       j compareDay
       
