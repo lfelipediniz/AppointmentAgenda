@@ -9,12 +9,18 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
+      MAX_MINUTES: .float 0.59
+      ONE: .float 1.0
+      NEGATIVE_ONE: .float -1.0
 
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
+
+      # flags
+      flag_loopMinutes: .word 0
 
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
@@ -120,6 +126,68 @@ insert:
       c.lt.s $f12, $f0   # Compare if $f12 less than $f0
       bc1t errorInsert   # if true, print error message
 
+      # verify if the decimal part of the float hour is greater than 59
+
+      l.s $f12, MAX_MINUTES
+      l.s $f13, aux_eventStartTime
+
+      # storage 1.0 in $f14
+      l.s $f14, ONE
+
+      # storage -1.0 in $f15
+      l.s $f15, NEGATIVE_ONE
+
+      j loop_verifyStartMinutes
+
+      loop_verifyStartMinutes:
+         # flag_loopMinutes = 0
+         sw $zero, flag_loopMinutes
+
+         # if the hour is greater than 1
+         c.lt.s $f13, $f14   
+         bc1t decreaseF13
+
+         # if the hour is equal to 1
+         c.eq.s $f13, $f14  
+         bc1t decreaseF13
+         
+         #if the hour is less than -1
+         c.lt.s $f15, $f13
+         bc1t increaseF13
+
+         #if the hour is equal to -1
+         c.eq.s $f15, $f13
+         bc1t increaseF13
+
+         # if flag_loopMinutes = 0, j to exit_verifyStartMinutes
+         lw $t0, flag_loopMinutes
+         beq $t0, $zero, exit_verifyStartMinutes
+
+      decreaseF13:
+         #f13 = f13 - 1.0
+         sub.s $f13, $f13, $f14
+         # flag_loopMinutes = 1
+         li $t0, 1
+
+         j loop_verifyStartMinutes
+
+      increaseF13:
+         #f13 = f13 + 1.0
+         add.s $f13, $f13, $f14
+         # flag_loopMinutes = 1
+         li $t0, 1
+         j loop_verifyStartMinutes
+
+      exit_verifyStartMinutes:
+         c.lt.s $f13, $f12   # Compare if $f0 less than $f12
+         bc1t errorInsert   # if true, print error message
+
+         
+
+
+
+
+         
    # print event end time
       li $v0, 4
       la $a0, insert_eventEndTime
@@ -144,8 +212,8 @@ insert:
       
       # if the hour is less than the start time, we need to print the errorInput message
       l.s $f12, aux_eventStartTime
-      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
-      bc1t errorInsert   # if true, print error message
+      c.lt.s $f0, $f12 # Compare if $f0 less than $f12
+      bc1t errorInsert  # if true, print error message
 
       j compareDay
       
