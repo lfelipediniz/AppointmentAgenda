@@ -104,6 +104,15 @@ insert:
       syscall
       move $s0, $v0
 
+   # verify is valid day
+      # if the day is less than 1, we need to print the errorInput message
+      li $t1, 1
+      blt $s0, $t1, errorInsert
+
+      # if the day is greater than 31, we need to print the errorInput message
+      li $t1, 31
+      bgt $s0, $t1, errorInsert
+
    # printing the event start question
       li $v0, 4
       la $a0, insert_eventStartTime
