@@ -9,18 +9,12 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
-      MAX_MINUTES: .float 0.599
-      ONE: .float 1.0
-      NEGATIVE_ONE: .float -1.0
 
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
-
-      # flags
-      flag_loopMinutes: .word 0
 
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
@@ -104,15 +98,6 @@ insert:
       syscall
       move $s0, $v0
 
-   # verify is valid day
-      # if the day is less than 1, we need to print the errorInput message
-      li $t1, 1
-      blt $s0, $t1, errorInsert
-
-      # if the day is greater than 31, we need to print the errorInput message
-      li $t1, 31
-      bgt $s0, $t1, errorInsert
-
    # printing the event start question
       li $v0, 4
       la $a0, insert_eventStartTime
@@ -134,33 +119,6 @@ insert:
       l.s $f12, MAX_HOUR
       c.lt.s $f12, $f0   # Compare if $f12 less than $f0
       bc1t errorInsert   # if true, print error message
-
-      # for minutes greater than 59, we need to print the errorInput message
-         # aux_startTime to f0
-         l.s $f0, aux_eventStartTime
-         l.s $f1, MAX_MINUTES
-
-         # Convert float to integer (truncate)
-         trunc.w.s $f4, $f0 
-
-         # move the integer part to an integer register $t0
-         mfc1 $t0, $f4
-
-         # Convert integer to float
-         mtc1 $t0, $f15    # move the integer part to a float register $f15
-         cvt.s.w $f15, $f15 # convert the integer part to a float
-
-         # subtract the integer value of the original value, f0 = f0 - f15
-         sub.s $f0, $f0, $f15
-
-         # print the value of f0 (debug)
-         li $v0, 2            
-         mov.s $f12, $f0      
-         syscall
-
-         # compare if the value of f0 is greater than 0.59
-         c.lt.s $f1, $f0  
-         bc1t errorInsert  
 
    # print event end time
       li $v0, 4
@@ -186,34 +144,8 @@ insert:
       
       # if the hour is less than the start time, we need to print the errorInput message
       l.s $f12, aux_eventStartTime
-      c.lt.s $f0, $f12 # Compare if $f0 less than $f12
-      bc1t errorInsert  # if true, print error message
-
-      # for minutes greater than 59, we need to print the errorInput message
-         # aux_startTime to f0
-         l.s $f20, aux_eventEndTime
-
-         # Convert float to integer (truncate)
-         trunc.w.s $f14, $f20 
-
-         # move the integer part to an integer register $t0
-         mfc1 $t9, $f14
-
-         # Convert integer to float
-         mtc1 $t9, $f22    # move the integer part to a float register $f15
-         cvt.s.w $f22, $f22 # convert the integer part to a float
-
-         # subtract the integer value of the original value, f0 = f0 - f15
-         sub.s $f20, $f20, $f22
-
-         # print the value of f0 (debug)
-         li $v0, 2            
-         mov.s $f12, $f20      
-         syscall
-
-         # compare if the value of f0 is greater than 0.59
-         c.lt.s $f1, $f20  
-         bc1t errorInsert  
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
 
       j compareDay
       
