@@ -126,68 +126,44 @@ insert:
       c.lt.s $f12, $f0   # Compare if $f12 less than $f0
       bc1t errorInsert   # if true, print error message
 
-      # verify if the decimal part of the float hour is greater than 59
+      # for minutes greater than 59, we need to print the errorInput message
+         # aux_startTime to f0
+         l.s $f0, aux_eventStartTime
 
-      l.s $f12, MAX_MINUTES
-      l.s $f13, aux_eventStartTime
+         # Convert float to integer (truncate)
+         trunc.w.s $f4, $f0 
 
-      # storage 1.0 in $f14
-      l.s $f14, ONE
+         # move the integer part to an integer register $t0
+         mfc1 $t0, $f4
 
-      # storage -1.0 in $f15
-      l.s $f15, NEGATIVE_ONE
+         # Convert integer to float
+         mtc1 $t0, $f15    # move the integer part to a float register $f15
+         cvt.s.w $f15, $f15 # convert the integer part to a float
 
-      j loop_verifyStartMinutes
+         # subtract the integer value of the original value, f0 = f0 - f15
+         sub.s $f0, $f0, $f15
 
-      loop_verifyStartMinutes:
-         # flag_loopMinutes = 0
-         sw $zero, flag_loopMinutes
-
-         # if the hour is greater than 1
-         c.lt.s $f13, $f14   
-         bc1t decreaseF13
-
-         # if the hour is equal to 1
-         c.eq.s $f13, $f14  
-         bc1t decreaseF13
-         
-         #if the hour is less than -1
-         c.lt.s $f15, $f13
-         bc1t increaseF13
-
-         #if the hour is equal to -1
-         c.eq.s $f15, $f13
-         bc1t increaseF13
-
-         # if flag_loopMinutes = 0, j to exit_verifyStartMinutes
-         lw $t0, flag_loopMinutes
-         beq $t0, $zero, exit_verifyStartMinutes
-
-      decreaseF13:
-         #f13 = f13 - 1.0
-         sub.s $f13, $f13, $f14
-         # flag_loopMinutes = 1
-         li $t0, 1
-
-         j loop_verifyStartMinutes
-
-      increaseF13:
-         #f13 = f13 + 1.0
-         add.s $f13, $f13, $f14
-         # flag_loopMinutes = 1
-         li $t0, 1
-         j loop_verifyStartMinutes
-
-      exit_verifyStartMinutes:
-         c.lt.s $f13, $f12   # Compare if $f0 less than $f12
-         bc1t errorInsert   # if true, print error message
-
-         
+         # print the value of f0 (debug)
+         li $v0, 2            
+         mov.s $f12, $f0      
+         syscall               
 
 
 
 
-         
+
+
+
+      
+
+
+
+
+
+
+
+
+
    # print event end time
       li $v0, 4
       la $a0, insert_eventEndTime
