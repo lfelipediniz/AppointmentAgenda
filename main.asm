@@ -12,8 +12,9 @@
       INVALID_DAY: .word 39
       
 
-      COMMON_SHOUR: .float 8.0
-      COMMON_EHOUR: .float 18.0
+   
+   #flags
+      editer_flag: .word 0
 
 
    #variables
@@ -47,10 +48,11 @@
 
    # strings returned to the user
       actions: .asciiz "Available actions:\n[1] insert\n[2] print\n[3] remove\n[4] edit\n[0] quit\n"
-      invalidAction: .asciiz "Invalid Action!\n"
+      invalidAction: .asciiz "\nInvalid Action!\n"
       errorInput: .asciiz "\nUnable to insert :(\n"
       welcome: .asciiz "Welcome to AppointmentAgenda!\n"
       notImplemented: .asciiz "Not implemented yet!\n"
+      errorWrongInput: .asciiz "\nWrong input!\n"
 
       # line break
       lineBreak: .asciiz "\n"
@@ -71,7 +73,15 @@
 
       # remove function outputs
       remove_eventNumber: .asciiz "What is the event number to be removed?\n"
+      remove_noEventToRemove: .asciiz "There is no event to remove!\n"
 
+      # edit function outputs
+      edit_eventNumber: .asciiz "What is the event number to be edited?\n"
+      edit_eventName: .asciiz "What is the new event name?\n"
+      edit_eventDay: .asciiz "What is the new event day?\n"
+      edit_eventStartTime: .asciiz "What is the new event start time?\n"
+      edit_eventEndTime: .asciiz "What is the new event end time?\n"
+      edit_noEventToEdit: .asciiz "There is no event to edit!\n"
 .text
 .globl main
 
@@ -84,10 +94,23 @@ j loop_action
 
 # this function inserts a new event
 insert:
+   # load flag to a register
+   lw $t9, editer_flag
+   # print line break
+   li $v0, 4
+   la $a0, lineBreak
+   syscall
+
+   # print editer_flag
+   li $v0, 1
+   move $a0, $t9
+   syscall
 
    # printing the event name question
       li $v0, 4
-      la $a0, insert_eventName
+      beq $t9, $zero, insert_name_message
+      la $a0, edit_eventName
+      insert_name_message2:
       syscall
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
@@ -106,7 +129,9 @@ insert:
 
    # printing the event day question
       li $v0, 4
-      la $a0, insert_eventDay
+      beq $t9, $zero, insert_day_message
+      la $a0, edit_eventDay
+      insert_day_message2:
       syscall
 
    # reading the event day as integer
@@ -116,7 +141,9 @@ insert:
 
    # printing the event start question
       li $v0, 4
-      la $a0, insert_eventStartTime
+      beq $t9, $zero, insert_startHour_message
+      la $a0, edit_eventStartTime
+      insert_startHour_message2:
       syscall
 
    # reading the event start time as float
@@ -138,7 +165,9 @@ insert:
 
    # print event end time
       li $v0, 4
-      la $a0, insert_eventEndTime
+      beq $t9, $zero, insert_endHour_message
+      la $a0, edit_eventEndTime
+      insert_endHour_message2:
       syscall
 
    # reading the event end time as float
@@ -173,8 +202,27 @@ insert:
       
       day_insert:
       exit_sortArray:
+      
+      # reset editer_flag to 0 if it is 1
+      lw $t0, editer_flag
+      beq $t0, $zero, skipThis
+      sub $t0, $t0, 1
+      skipThis:
+      
+      # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
 
+      # print editer_flag
+      li $v0, 1
+      move $a0, $t0
+      syscall
 
+      # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
 
    # increase at one the eventCounter
       lw $t0, eventCounter
@@ -191,7 +239,22 @@ insert:
 
       j loop_action
 
+insert_name_message:
+   la $a0, insert_eventName
+   j insert_name_message2   
 
+insert_day_message:
+   la $a0, insert_eventDay
+   j insert_day_message2   
+
+insert_startHour_message:
+   la $a0, insert_eventStartTime
+   j insert_startHour_message2   
+
+insert_endHour_message:
+   la $a0, insert_eventEndTime
+   j insert_endHour_message2   
+ 
 compareDay:
 
 
@@ -531,7 +594,12 @@ print:
 
 
 # function to remove an event
-remove:
+remove: 
+   # if eventCounter is equal to 1, we have no events to remove
+   lw $t0, eventCounter
+   beq $t0, 1, errorNoEventToRemove
+
+
     # print the event number question
       li $v0, 4
       la $a0, remove_eventNumber
@@ -542,10 +610,16 @@ remove:
       syscall
       sw $v0, eventNumber
 
+   # if $v0 is smaller than 2 or bigger than eventCounter we need to print the errorInput message
+      blt $v0, 1, errorWrongInputf
+      sub $t0, $t0, 1
+      bgt $v0, $t0, errorWrongInputf
+
+
+   edit_remover:
    # eventNumber is number of the event to be removed
       lw $t0, eventNumber
       lw $t1, eventCounter
-   loop_remover:
       addi $t0, $t0, 1
       bge $t0, $t1, exit_remover
       
@@ -553,7 +627,7 @@ remove:
       sub $t5, $t2, 50 #MAX_LENGTH_DAY
       la $t4, eventsName($t2)
       la $t6, eventsName($t5)
-      
+
       loop_nameRemover:
          lb $t7, 0($t4)
          sb $t7, 0($t6)
@@ -584,14 +658,60 @@ remove:
    subi $t1, $t1, 1
    sw $t1, eventCounter
 
+   lw $t0, editer_flag
+   beq $t0, $zero loop_action
+   j insert
+
+
+errorNoEventToRemove:
+   li $v0, 4
+   la $a0, remove_noEventToRemove
+   syscall
+
    j loop_action
 
 # function to edit an event
 edit:
-    li $v0, 4
-    la $a0, notImplemented
-    syscall
-    j loop_action
+    # if eventCounter is 1, we need to print the errorEdit message
+      lw $t0, eventCounter
+      beq $t0, 1, errorNoEvent
+
+    # print the event number question
+      li $v0, 4
+      la $a0, edit_eventNumber
+      syscall
+
+   # store the event number in the eventNumber variable
+      li $v0, 5
+      syscall
+      sw $v0, eventNumber
+
+   # if $v0 is smaller than 1 or bigger than eventCounter we need to print the errorInput message
+      blt $v0, 1, errorWrongInputf
+      sub $t0, $t0, 1
+      bgt $v0, $t0, errorWrongInputf
+
+      # set editer_flag to 1
+      lw $t0, editer_flag
+      addi $t0, $t0, 1
+      sw $t0, editer_flag
+
+   # jumps to remove function with editer_flag set to 1
+   j edit_remover
+
+errorNoEvent:
+   li $v0, 4
+   la $a0, edit_noEventToEdit
+   syscall
+
+   j loop_action
+
+errorWrongInputf:
+   li $v0, 4
+   la $a0, errorWrongInput
+   syscall
+
+   j loop_action
 
 main:
     # loop quest the action to the user
