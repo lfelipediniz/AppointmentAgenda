@@ -215,17 +215,19 @@ compareDay:
 
       # loop to copy the aux_eventName into eventsName
       loop_insertNameinAux:
-         lb $t7, 0($t4)
-         sb $t7, 0($t5)
+         lb $t7, 0($t5)
+         sb $t7, 0($t4)
          addi $t4, $t4, 1
          addi $t5, $t5, 1
          bne $t7, $zero, loop_insertNameinAux
          j  exit_insertNameinAux
 
-      exit_insertNameinAux:
+       exit_insertNameinAux:
+
 
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
+      
 
       lw $t4, eventsDay($t3)
       l.s $f14, eventsStartTime($t3)
@@ -342,10 +344,7 @@ exit_compareDay:
    la $t1, aux_eventName
    la $t2, eventsName($t0)
 
-   # print aux_eventName (debug)
-   li $v0, 4
-   la $a0, aux_eventName
-   syscall
+
 
    # loop to copy the aux_eventName into eventsName
    loop_insertName:
