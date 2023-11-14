@@ -30,6 +30,8 @@
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
       aux_eventEndTime: .float 0.0
+      aux_eventString: .space 50
+      aux_eventName: .space 50
 
       #flags
       flag_removeSort: .word 0
@@ -97,8 +99,7 @@ insert:
 
    # reading the event name
       li $v0, 8
-      la $a0, eventsName
-      add $a0, $a0, $t0
+      la $a0, aux_eventName
       li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
@@ -206,11 +207,31 @@ compareDay:
       # if auxCounter is equal to eventCounter, we have compared all days, the value inserted is the biggest
       bge $t1, $t2, exit_compareDay
 
+      mul $t3, $t1, 50 #MAX_LENGTH_EVENT_NAME
+
+      # aux_eventName into eventsName array
+      la $t4, aux_eventString
+      la $t5, eventsName($t3)
+
+      # loop to copy the aux_eventName into eventsName
+      loop_insertNameinAux:
+         lb $t7, 0($t4)
+         sb $t7, 0($t5)
+         addi $t4, $t4, 1
+         addi $t5, $t5, 1
+         bne $t7, $zero, loop_insertNameinAux
+         j  exit_insertNameinAux
+
+      exit_insertNameinAux:
+
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
+
       lw $t4, eventsDay($t3)
       l.s $f14, eventsStartTime($t3)
       l.s $f16, eventsEndTime($t3)
+
+
       beq $t4, $s0, compareHour
 
       exit_compareHour:
@@ -291,6 +312,9 @@ sortArray:
    s.s $f16, eventsEndTime($t3) # store end time in the array in $f12
    mov.s $f16, $f17 # move end time in the array to $f12
 
+   # event name in the array sorted
+
+
 
    j loop_sortArray
 
@@ -308,6 +332,31 @@ exit_compareDay:
    # event end time in the array sorted
    l.s $f13, aux_eventEndTime
    s.s $f13, eventsEndTime($t0)
+
+   insertAuxEvent:
+   # set t0 apropiate position in the array
+   lw $t0, eventCounter
+   mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
+
+   # aux_eventName into eventsName array
+   la $t1, aux_eventName
+   la $t2, eventsName($t0)
+
+   # print aux_eventName (debug)
+   li $v0, 4
+   la $a0, aux_eventName
+   syscall
+
+   # loop to copy the aux_eventName into eventsName
+   loop_insertName:
+      lb $t3, 0($t1)
+      sb $t3, 0($t2)
+      addi $t1, $t1, 1
+      addi $t2, $t2, 1
+      bne $t3, $zero, loop_insertName
+      j exit_insertName
+
+   exit_insertName:
 
    j day_insert
    
