@@ -179,7 +179,14 @@ insert:
       addi $t0, $t0, 1
       sw $t0, eventCounter
 
+      j loop_action
+
    jumpIncrement:
+      #decrease 1 in eventCounter
+      lw $t1, eventCounter
+      subi $t1, $t1, 1
+      sw $t1, eventCounter
+
       j loop_action
 
 
@@ -439,11 +446,6 @@ remove:
    # storage INVALID in the event day
    lw $t1, INVALID_DAY_MASTER
    sw $t1, eventsDay($t0)
-
-   #decrease 2 in eventCounter
-   lw $t1, eventCounter
-   subi $t1, $t1, 1
-   sw $t1, eventCounter
 
    # storage 1 in t1
    li $t1, 1 # auxCounter
