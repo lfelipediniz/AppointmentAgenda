@@ -336,16 +336,16 @@ sortArray:
    mul $t3, $t1, 50 #MAX_LENGTH_EVENT_NAME
    # aux_eventString aux_eventName e eventsName
    
-   # copy from eventsName($t3) to aux_eventString
+   # copy from eventsName($t3) to aux_eventName
    la $t6, eventsName($t3)
    la $t7, aux_eventName
 
    loop_nameSort:
-      lb $t3, 0($t6)
-      sb $t3, 0($t7)
+      lb $t8, 0($t6)
+      sb $t8, 0($t7)
       addi $t6, $t6, 1
       addi $t7, $t7, 1
-      bne $t3, $zero, loop_nameSort
+      bne $t8, $zero, loop_nameSort
       j exit_nameSort
    exit_nameSort:
 
@@ -354,11 +354,11 @@ sortArray:
    la $t7, eventsName($t3)
 
    loop_nameSort2:
-      lb $t3, 0($t6)
-      sb $t3, 0($t7)
+      lb $t8, 0($t6)
+      sb $t8, 0($t7)
       addi $t6, $t6, 1
       addi $t7, $t7, 1
-      bne $t3, $zero, loop_nameSort2
+      bne $t8, $zero, loop_nameSort2
       j exit_nameSort2
    exit_nameSort2:
 
@@ -367,11 +367,11 @@ sortArray:
    la $t7, aux_eventString
 
    loop_nameSort3:
-      lb $t3, 0($t6)
-      sb $t3, 0($t7)
+      lb $t8, 0($t6)
+      sb $t8, 0($t7)
       addi $t6, $t6, 1
       addi $t7, $t7, 1
-      bne $t3, $zero, loop_nameSort3
+      bne $t8, $zero, loop_nameSort3
       j exit_nameSort3
    exit_nameSort3:
 
