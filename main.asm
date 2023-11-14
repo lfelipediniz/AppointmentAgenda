@@ -248,7 +248,7 @@ compareDay:
 
 
 compareHour:
-  mul $t5, $t2, 4 #MAX_LENGTH_HOUR
+  mul $t5, $t1, 4 #MAX_LENGTH_HOUR
 
   # store the start time and end time of the event inserted confliction and atual event
   l.s $f13, eventsStartTime($t3)
