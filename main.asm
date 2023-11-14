@@ -279,7 +279,25 @@ compareHour:
 
 
 sortArray:
+   # store aux_eventName into eventsName array
 
+   mul $t3, $t1, 50 #MAX_LENGTH_EVENT_NAME
+   # aux_eventName into eventsName array
+   la $t6, aux_eventName
+   la $t7, eventsName($t3)
+   # loop to copy the aux_eventName into eventsName
+   loop_insertAuxName:
+      lb $t3, 0($t6)
+      sb $t3, 0($t7)
+      addi $t6, $t6, 1
+      addi $t7, $t7, 1
+      bne $t3, $zero, loop_insertAuxName
+      j exit_insertAuxName
+
+   exit_insertAuxName:
+
+
+   mul $t3, $t1, 4 #MAX_LENGTH_DAY
    # store day inserted in the array
    sw $s0, eventsDay($t3)
 
@@ -315,8 +333,47 @@ sortArray:
    mov.s $f16, $f17 # move end time in the array to $f12
 
    # event name in the array sorted
+   mul $t3, $t1, 50 #MAX_LENGTH_EVENT_NAME
+   # aux_eventString aux_eventName e eventsName
+   
+   # copy from eventsName($t3) to aux_eventString
+   la $t6, eventsName($t3)
+   la $t7, aux_eventName
 
+   loop_nameSort:
+      lb $t3, 0($t6)
+      sb $t3, 0($t7)
+      addi $t6, $t6, 1
+      addi $t7, $t7, 1
+      bne $t3, $zero, loop_nameSort
+      j exit_nameSort
+   exit_nameSort:
 
+   # store aux_eventString into eventsName($t3) array
+   la $t6, aux_eventString
+   la $t7, eventsName($t3)
+
+   loop_nameSort2:
+      lb $t3, 0($t6)
+      sb $t3, 0($t7)
+      addi $t6, $t6, 1
+      addi $t7, $t7, 1
+      bne $t3, $zero, loop_nameSort2
+      j exit_nameSort2
+   exit_nameSort2:
+
+   # move aux_eventName to aux_eventString
+   la $t6, aux_eventName
+   la $t7, aux_eventString
+
+   loop_nameSort3:
+      lb $t3, 0($t6)
+      sb $t3, 0($t7)
+      addi $t6, $t6, 1
+      addi $t7, $t7, 1
+      bne $t3, $zero, loop_nameSort3
+      j exit_nameSort3
+   exit_nameSort3:
 
    j loop_sortArray
 
