@@ -9,12 +9,20 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
+      INVALID_DAY: .word -1
+      INVALID_HOUR: .float -1.0
+      INVALID_EVENT_NAME: 
+
 
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
+
+      #event number for remove and edit
+      eventNumber: .word 0
+      
 
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
@@ -54,6 +62,10 @@
       print_eventDay: .asciiz "Event day: "
       print_eventStartTime: .asciiz "Event start time: "
       print_eventEndTime: .asciiz "Event end time: "
+      print_eventNumber: .asciiz "Event number: "
+
+      # remove function outputs
+      remove_eventNumber: .asciiz "What is the event number to be removed?\n"
 
 .text
 .globl main
@@ -301,6 +313,21 @@ print:
       # if auxCounter is equal to eventCounter, we have printed all events
       bge $t0, $t1, exit_print
 
+      # Print text of event number
+      li $v0, 4
+      la $a0, print_eventNumber
+      syscall
+
+      # print t0
+      li $v0, 1
+      move $a0, $t0
+      syscall
+
+      # Print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
+
       # Print text of event name
       li $v0, 4
       la $a0, print_eventName
@@ -379,10 +406,47 @@ print:
 
 # function to remove an event
 remove:
-    li $v0, 4
-    la $a0, notImplemented
-    syscall
-    j loop_action
+    # print the event number question
+      li $v0, 4
+      la $a0, remove_eventNumber
+      syscall
+
+   # store the event number in the eventNumber variable
+      li $v0, 5
+      syscall
+      sw $v0, eventNumber
+
+   # adapt eventNumber to integer
+   lw $t0, eventNumber
+   mul $t0, $t0, 4 #DAY_LENGTH
+
+   # storage INVALID in the event day
+   lw $t1, INVALID_DAY
+   sw $t1, eventsDay($t0)
+
+   # storage INVALID in the event start time
+   l.s $f12, INVALID_HOUR
+   s.s $f12, eventsStartTime($t0)
+
+   # storage INVALID in the event end time
+   l.s $f13, INVALID_HOUR
+   s.s $f13, eventsEndTime($t0)
+
+   # calculate offset in name array
+    li $t0, 0
+    lw $t1, eventNumber
+    mul $t1, $t1, 50  # Size of each string (MAX_LENGTH_EVENT_NAME)
+    add $t0, $t0, $t1
+
+    # access event name at specific position
+    la $t2, eventsName
+    add $t2, $t2, $t0  # point to the name of the event to be removed
+
+    # replace the first character of the string with '0'
+    li $t3, 48  # '0' in ASCII table
+    sb $t3, ($t2)  # replace the first character with '0'
+
+   j loop_action
 
 # function to edit an event
 edit:
