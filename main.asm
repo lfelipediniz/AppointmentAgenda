@@ -10,7 +10,6 @@
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
       INVALID_DAY: .word 39
-      INVALID_DAY_MASTER: .word 45
       
 
       COMMON_SHOUR: .float 8.0
@@ -33,8 +32,6 @@
       aux_eventString: .space 50
       aux_eventName: .space 50
 
-      #flags
-      flag_removeSort: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
@@ -177,9 +174,7 @@ insert:
       day_insert:
       exit_sortArray:
 
-   # if flag_removeSort is equal to 1, goto jumpIncrement
-      lw $t3, flag_removeSort
-      beq $t3, 1, jumpIncrement
+
 
    # increase at one the eventCounter
       lw $t0, eventCounter
@@ -199,9 +194,6 @@ insert:
 
 compareDay:
 
-   # set flag_removeSort to 0
-   li $t3, 0
-   sw $t3, flag_removeSort
 
    # using auxCounter set to value 1
    li $t1, 1
@@ -550,25 +542,35 @@ remove:
       syscall
       sw $v0, eventNumber
 
-   # adapt eventNumber to integer
-   lw $t0, eventNumber
-   mul $t0, $t0, 4 #DAY_LENGTH
+   # eventNumber is number of the event to be removed
+      lw $t0, eventNumber
+      lw $t1, eventCounter
+   loop_remover:
+      addi $t0, $t0, 1
+      bge $t0, $t1, exit_remover
+      
+      
 
-   # storage INVALID in the event day
-   lw $t1, INVALID_DAY_MASTER
-   sw $t1, eventsDay($t0)
+      mul $t2, $t0, 4 #MAX_LENGTH_DAY
+      sub $t5, $t2, 4 #MAX_LENGTH_DAY
+      
+      lw $t4, eventsDay($t2)
+      sw $t4, eventsDay($t5)
 
-   # storage 1 in t1
-   li $t1, 1 # auxCounter
+      l.s $f12, eventsStartTime($t2)
+      s.s $f12, eventsStartTime($t5)
 
-   # storage eventCounter in t2
-   lw $t2, eventCounter
+      l.s $f13, eventsEndTime($t2)
+      s.s $f13, eventsEndTime($t5)
 
-   # set flag_removeSort to 1
-   li $t3, 1
-   sw $t3, flag_removeSort
 
-   j loop_sortArray
+   exit_remover:
+   # decrease eventCounter
+   lw $t1, eventCounter
+   subi $t1, $t1, 1
+   sw $t1, eventCounter
+
+   j loop_action
 
 # function to edit an event
 edit:
