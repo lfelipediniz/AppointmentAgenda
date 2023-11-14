@@ -549,7 +549,21 @@ remove:
       addi $t0, $t0, 1
       bge $t0, $t1, exit_remover
       
+      mul $t2, $t0, 50 #MAX_LENGTH_EVENT_NAME
+      sub $t5, $t2, 50 #MAX_LENGTH_DAY
+      la $t4, eventsName($t2)
+      la $t6, eventsName($t5)
       
+      loop_nameRemover:
+         lb $t7, 0($t4)
+         sb $t7, 0($t6)
+         addi $t4, $t4, 1
+         addi $t6, $t6, 1
+         bne $t7, $zero, loop_nameRemover
+         j exit_nameRemover
+
+      exit_nameRemover:
+
 
       mul $t2, $t0, 4 #MAX_LENGTH_DAY
       sub $t5, $t2, 4 #MAX_LENGTH_DAY
