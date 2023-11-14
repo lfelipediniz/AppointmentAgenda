@@ -9,10 +9,7 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
-      INVALID_DAY: .word 39
-      
 
-   
    #flags
       editer_flag: .word 0
 
@@ -96,22 +93,20 @@ j loop_action
 insert:
    # load flag to a register
    lw $t9, editer_flag
-   # print line break
-   li $v0, 4
-   la $a0, lineBreak
-   syscall
+  
 
-   # print editer_flag
-   li $v0, 1
-   move $a0, $t9
-   syscall
+ # storage the number 1 to the register
+   li $t7, 1
+
+ # Check if $t9 == 1
+    beq $t9, $t7, insert_name_message # Branch if $t9 is not equal to 1
 
    # printing the event name question
       li $v0, 4
-      beq $t9, $zero, insert_name_message
-      la $a0, edit_eventName
-      insert_name_message2:
+      la $a0, insert_eventName
       syscall
+
+   insert_name_message2:
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
       lw $t0, eventCounter
@@ -127,24 +122,31 @@ insert:
       lw $t0, eventCounter
       mul $t0, $t0, 4
 
+ # Check if $t9 == 1
+    beq $t9, $t7, insert_day_message # Branch if $t9 is not equal to 1
+
    # printing the event day question
       li $v0, 4
-      beq $t9, $zero, insert_day_message
-      la $a0, edit_eventDay
-      insert_day_message2:
+      la $a0, insert_eventDay
       syscall
+
+   insert_day_message2:
 
    # reading the event day as integer
       li $v0, 5
       syscall
       move $s0, $v0
 
+   
+ # Check if $t9 == 1
+    beq $t9, $t7, insert_startHour_message # Branch if $t9 is not equal to 1
+
    # printing the event start question
       li $v0, 4
-      beq $t9, $zero, insert_startHour_message
-      la $a0, edit_eventStartTime
-      insert_startHour_message2:
+      la $a0, insert_eventStartTime
       syscall
+
+   insert_startHour_message2:
 
    # reading the event start time as float
       li $v0, 6
@@ -163,12 +165,15 @@ insert:
       c.lt.s $f12, $f0   # Compare if $f12 less than $f0
       bc1t errorInsert   # if true, print error message
 
+ # Check if $t9 == 1
+    beq $t9, $t7, insert_endHour_message # Branch if $t9 is not equal to 1
+
    # print event end time
       li $v0, 4
-      beq $t9, $zero, insert_endHour_message
-      la $a0, edit_eventEndTime
-      insert_endHour_message2:
+      la $a0, insert_eventEndTime
       syscall
+
+   insert_endHour_message2:
 
    # reading the event end time as float
       li $v0, 6
@@ -239,21 +244,33 @@ insert:
 
       j loop_action
 
-insert_name_message:
-   la $a0, insert_eventName
-   j insert_name_message2   
+   insert_name_message:
+      li $v0, 4
+      la $a0, edit_eventName
+      syscall
 
-insert_day_message:
-   la $a0, insert_eventDay
-   j insert_day_message2   
+      j insert_name_message2
 
-insert_startHour_message:
-   la $a0, insert_eventStartTime
-   j insert_startHour_message2   
+   insert_day_message:
+      li $v0, 4
+      la $a0, edit_eventDay
+      syscall 
 
-insert_endHour_message:
-   la $a0, insert_eventEndTime
-   j insert_endHour_message2   
+      j insert_day_message2
+
+   insert_startHour_message:
+      li $v0, 4
+      la $a0, edit_eventStartTime
+      syscall 
+
+      j insert_startHour_message2 
+
+   insert_endHour_message:
+      li $v0, 4
+      la $a0, edit_eventEndTime
+      syscall  
+
+      j insert_endHour_message2
  
 compareDay:
 
