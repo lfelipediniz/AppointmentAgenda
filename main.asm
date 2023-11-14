@@ -9,9 +9,14 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
-      INVALID_DAY: .word -1
-      INVALID_HOUR: .float -1.0
-      INVALID_EVENT_NAME: 
+      INVALID_DAY: .word 39
+      INVALID_DAY_MASTER: .word 45
+      
+
+      COMMON_SHOUR: .float 8.0
+      COMMON_EHOUR: .float 18.0
+
+
 
 
    #variables
@@ -236,7 +241,8 @@ compareHour:
 sortArray:
 
    # store day inserted in the array
-   sw $s0, eventsDay($t3) 
+   sw $s0, eventsDay($t3)
+
 
    # store start time inserted in the array
    l.s $f12, aux_eventStartTime
@@ -421,32 +427,21 @@ remove:
    mul $t0, $t0, 4 #DAY_LENGTH
 
    # storage INVALID in the event day
-   lw $t1, INVALID_DAY
+   lw $t1, INVALID_DAY_MASTER
    sw $t1, eventsDay($t0)
 
-   # storage INVALID in the event start time
-   l.s $f12, INVALID_HOUR
-   s.s $f12, eventsStartTime($t0)
+   #decrease 2 in eventCounter
+   lw $t1, eventCounter
+   subi $t1, $t1, 2
+   sw $t1, eventCounter
 
-   # storage INVALID in the event end time
-   l.s $f13, INVALID_HOUR
-   s.s $f13, eventsEndTime($t0)
+   # storage 1 in t1
+   li $t1, 1 # auxCounter
 
-   # calculate offset in name array
-    li $t0, 0
-    lw $t1, eventNumber
-    mul $t1, $t1, 50  # Size of each string (MAX_LENGTH_EVENT_NAME)
-    add $t0, $t0, $t1
+   # storage eventCounter in t2
+   lw $t2, eventCounter
 
-    # access event name at specific position
-    la $t2, eventsName
-    add $t2, $t2, $t0  # point to the name of the event to be removed
-
-    # replace the first character of the string with '0'
-    li $t3, 48  # '0' in ASCII table
-    sb $t3, ($t2)  # replace the first character with '0'
-
-   j loop_action
+   j loop_sortArray
 
 # function to edit an event
 edit:
