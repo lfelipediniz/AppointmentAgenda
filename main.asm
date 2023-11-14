@@ -148,6 +148,12 @@ insert:
       li $v0, 6
       syscall
       s.s $f0, aux_eventEndTime
+      l.s $f15, aux_eventStartTime
+      c.lt.s $f0, $f15   # if f0 < f15
+      bc1t errorInsert        
+
+      c.eq.s $f0, $f15   # if f0 == f15
+      bc1t errorInsert 
 
    # verify if is a valid hour
 
@@ -251,17 +257,17 @@ compareHour:
   mul $t5, $t1, 4 #MAX_LENGTH_HOUR
 
   # store the start time and end time of the event inserted confliction and atual event
-  l.s $f13, eventsStartTime($t3)
-  l.s $f14, eventsEndTime($t3)
+  l.s $f13, aux_eventStartTime
+  l.s $f14, aux_eventEndTime
   l.s $f15, eventsStartTime($t5)
   l.s $f16, eventsEndTime($t5)
 
     # verify if the event inserted confliction with the atual event
     c.lt.s $f14, $f15   # if f14 < f15
-    bc1t exit_compareHour        
+    bc1t sortArray        
 
     c.eq.s $f14, $f15   # if f14 == f15
-    bc1t exit_compareHour          
+    bc1t sortArray          
 
     c.lt.s $f16, $f13   # if f16 < f13
     bc1t exit_compareHour          
@@ -276,6 +282,7 @@ compareHour:
     bc1t errorInsert         
 
     j errorInsert  # after all comparisons, we need to print the errorInput message
+
 
 
 sortArray:
@@ -334,7 +341,6 @@ sortArray:
 
    # event name in the array sorted
    mul $t3, $t1, 50 #MAX_LENGTH_EVENT_NAME
-   # aux_eventString aux_eventName e eventsName
    
    # copy from eventsName($t3) to aux_eventName
    la $t6, eventsName($t3)
