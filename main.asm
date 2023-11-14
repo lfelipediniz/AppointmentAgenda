@@ -17,8 +17,6 @@
       COMMON_EHOUR: .float 18.0
 
 
-
-
    #variables
       #action inserted by the user
       action: .word 0
@@ -32,6 +30,9 @@
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
       aux_eventEndTime: .float 0.0
+
+      #flags
+      flag_removeSort: .word 0
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
@@ -169,15 +170,24 @@ insert:
       day_insert:
       exit_sortArray:
 
+   # if flag_removeSort is equal to 1, goto jumpIncrement
+      lw $t3, flag_removeSort
+      beq $t3, 1, jumpIncrement
+
    # increase at one the eventCounter
       lw $t0, eventCounter
       addi $t0, $t0, 1
       sw $t0, eventCounter
 
+   jumpIncrement:
       j loop_action
 
 
 compareDay:
+
+   # set flag_removeSort to 0
+   li $t3, 0
+   sw $t3, flag_removeSort
 
    # using auxCounter set to value 1
    li $t1, 1
@@ -432,7 +442,7 @@ remove:
 
    #decrease 2 in eventCounter
    lw $t1, eventCounter
-   subi $t1, $t1, 2
+   subi $t1, $t1, 1
    sw $t1, eventCounter
 
    # storage 1 in t1
@@ -440,6 +450,10 @@ remove:
 
    # storage eventCounter in t2
    lw $t2, eventCounter
+
+   # set flag_removeSort to 1
+   li $t3, 1
+   sw $t3, flag_removeSort
 
    j loop_sortArray
 
