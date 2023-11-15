@@ -80,6 +80,7 @@
       edit_eventStartTime: .asciiz "What is the new event start time?\n"
       edit_eventEndTime: .asciiz "What is the new event end time?\n"
       edit_noEventToEdit: .asciiz "There is no event to edit!\n"
+      edit_keepThis: .asciiz "\nKeep this value?\n[1] Yes\n[2] No\n"
 .text
 .globl main
 
@@ -119,6 +120,8 @@ insert:
       li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
+   insert_name_message1:
+
    # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
       lw $t0, eventCounter
       mul $t0, $t0, 4
@@ -137,6 +140,8 @@ insert:
       li $v0, 5
       syscall
       move $s0, $v0
+
+   insert_day_message1:
 
    
  # Check if $t9 == 1
@@ -191,7 +196,9 @@ insert:
 
       # compare if the minutes is greater than 59
       c.lt.s $f19, $f12  
-      bc1t errorInsert       
+      bc1t errorInsert   
+
+   insert_startHour_message1:    
 
  # Check if $t9 == 1
     beq $t9, $t7, insert_endHour_message # Branch if $t9 is not equal to 1
@@ -256,7 +263,9 @@ insert:
 
       # compare if the minutes is greater than 59
       c.lt.s $f19, $f12  
-      bc1t errorInsert       
+      bc1t errorInsert 
+
+   insert_endHour_message1:     
 
       j compareDay
       
@@ -304,6 +313,18 @@ insert:
       la $a0, edit_eventName
       syscall
 
+      # keep question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+      # read the int number of the action
+      li $v0, 5
+      syscall
+
+      # if v0 is equal to 1, we need to keep the value, jump to insert_name_message1
+      beq $v0, 1, insert_name_message1
+
       j insert_name_message2
 
    insert_day_message:
@@ -311,19 +332,54 @@ insert:
       la $a0, edit_eventDay
       syscall 
 
-      j insert_day_message2
+     # keep question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
 
+      # read the int number of the action
+      li $v0, 5
+      syscall
+
+      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
+      beq $v0, 1, insert_day_message1
+
+      j insert_day_message2
    insert_startHour_message:
       li $v0, 4
       la $a0, edit_eventStartTime
       syscall 
+
+     # keep question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+      # read the int number of the action
+      li $v0, 5
+      syscall
+
+      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
+      beq $v0, 1, insert_startHour_message1
 
       j insert_startHour_message2 
 
    insert_endHour_message:
       li $v0, 4
       la $a0, edit_eventEndTime
-      syscall  
+      syscall
+
+     # keep question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+      # read the int number of the action
+      li $v0, 5
+      syscall
+
+      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
+      beq $v0, 1, insert_endHour_message1  
 
       j insert_endHour_message2
  
@@ -767,6 +823,35 @@ edit:
       lw $t0, editer_flag
       addi $t0, $t0, 1
       sw $t0, editer_flag
+
+   # storage the evventday in s0
+      lw $t0, eventNumber
+      mul $t0, $t0, 4 #MAX_LENGTH_DAY
+
+      lw $s0, eventsDay($t0)
+
+   # storage the event start time in aux_eventStartTime
+      l.s $f12, eventsStartTime($t0)
+      s.s $f12, aux_eventStartTime
+
+   # storage the event end time in aux_eventEndTime
+      l.s $f12, eventsEndTime($t0)
+      s.s $f12, aux_eventEndTime
+
+   # storage the event name in aux_eventName
+      mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
+      la $t1, eventsName($t0)
+      la $t2, aux_eventName
+
+      loop_nameEdit:
+         lb $t3, 0($t1)
+         sb $t3, 0($t2)
+         addi $t1, $t1, 1
+         addi $t2, $t2, 1
+         bne $t3, $zero, loop_nameEdit
+         j exit_nameEdit
+
+      exit_nameEdit:
 
    # jumps to remove function with editer_flag set to 1
    j edit_remover
