@@ -9,6 +9,7 @@
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
       MAX_HOUR: .float 23.59
+      MAX_MINUTES: .float 0.59
 
    #flags
       editer_flag: .word 0
@@ -165,6 +166,33 @@ insert:
       c.lt.s $f12, $f0   # Compare if $f12 less than $f0
       bc1t errorInsert   # if true, print error message
 
+      # for minutes greater than 59, we need to print the errorInput message
+
+      # storage aux_eventStartTime in $f12
+      l.s $f12, aux_eventStartTime
+
+      # Convert the floating-point value in f12 to an integer
+      cvt.w.s $f22, $f12   # Convert single-precision floating point to 32-bit integer in f0
+      # Store the integer part in an integer register
+      mfc1 $t6, $f22        # Move the integer value from f0 to $t0
+
+
+      # Move the integer value from $t6 to a floating-point register $f12
+      mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
+
+      # Convert the integer value in $f12 to a floating-point value
+      cvt.s.w $f16, $f16  # Convert 32-bit integer in $f12 to single-precision float in $f12
+
+      # Subtract the value in f16 from f12 and store the result in f12
+      sub.s $f12, $f12, $f16  
+
+      # storage MAX_MINUTES in $f19
+      l.s $f19, MAX_MINUTES
+
+      # compare if the minutes is greater than 59
+      c.lt.s $f19, $f12  
+      bc1t errorInsert       
+
  # Check if $t9 == 1
     beq $t9, $t7, insert_endHour_message # Branch if $t9 is not equal to 1
 
@@ -202,6 +230,33 @@ insert:
       l.s $f12, aux_eventStartTime
       c.lt.s $f0, $f12   # Compare if $f0 less than $f12
       bc1t errorInsert   # if true, print error message
+
+      # for minutes greater than 59, we need to print the errorInput message
+
+      # storage aux_eventStartTime in $f12
+      l.s $f12, aux_eventEndTime
+
+      # Convert the floating-point value in f12 to an integer
+      cvt.w.s $f22, $f12   # Convert single-precision floating point to 32-bit integer in f0
+      # Store the integer part in an integer register
+      mfc1 $t6, $f22        # Move the integer value from f0 to $t0
+
+
+      # Move the integer value from $t6 to a floating-point register $f12
+      mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
+
+      # Convert the integer value in $f12 to a floating-point value
+      cvt.s.w $f16, $f16  # Convert 32-bit integer in $f12 to single-precision float in $f12
+
+      # Subtract the value in f16 from f12 and store the result in f12
+      sub.s $f12, $f12, $f16  
+
+      # storage MAX_MINUTES in $f19
+      l.s $f19, MAX_MINUTES
+
+      # compare if the minutes is greater than 59
+      c.lt.s $f19, $f12  
+      bc1t errorInsert       
 
       j compareDay
       
