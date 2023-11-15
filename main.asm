@@ -141,6 +141,10 @@ insert:
       syscall
       move $s0, $v0
 
+   # if $v0 is smaller than 1 or bigger than 31 we need to print the errorInput message
+      blt $v0, 1, errorInsert
+      bgt $v0, 31, errorInsert
+
    insert_day_message1:
 
    
@@ -278,21 +282,6 @@ insert:
       sub $t0, $t0, 1
       skipThis:
       
-      # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
-
-      # print editer_flag
-      li $v0, 1
-      move $a0, $t0
-      syscall
-
-      # print line break
-      li $v0, 4
-      la $a0, lineBreak
-      syscall
-
    # increase at one the eventCounter
       lw $t0, eventCounter
       addi $t0, $t0, 1
