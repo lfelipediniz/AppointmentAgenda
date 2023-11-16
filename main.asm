@@ -741,7 +741,7 @@ edit:
 
    # printing the event day question
       li $v0, 4
-      la $a0, insert_eventDay
+      la $a0, edit_eventDay
       syscall
 
    # print keep event question
@@ -775,7 +775,7 @@ edit:
    
    # printing the event start question
       li $v0, 4
-      la $a0, insert_eventStartTime
+      la $a0, edit_eventStartTime
       syscall
 
    # print keep event question
@@ -843,7 +843,7 @@ edit:
 
    # print event end time
       li $v0, 4
-      la $a0, insert_eventEndTime
+      la $a0, edit_eventEndTime
       syscall
 
    # print keep event qkeep
