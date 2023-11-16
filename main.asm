@@ -286,18 +286,18 @@ compareDay:
 
        exit_insertNameinAux:
 
-      # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       
-      lw $t4, eventsDay($t3)
-      l.s $f14, eventsStartTime($t3)
-      l.s $f16, eventsEndTime($t3)
+      lw $t4, eventsDay($t3)  # current event day
+      l.s $f14, eventsStartTime($t3)   # current event start time
+      l.s $f16, eventsEndTime($t3)  # current event end time (these are loaded to be used in the sort function when needed)
 
+      # if the day inserted($s0) is equal to current day($t4) in the array, we need to compare the hours
       beq $t4, $s0, compareHour
 
       exit_compareHour:
 
-      # if the day inserted is less than any day in the array, we need to insert it in actual position
+      # if the day inserted is smaller than any day in the array, we need to insert it in current position
       blt $s0, $t4, sortArray
 
       # Increment auxCounter
@@ -315,26 +315,21 @@ compareHour:
   l.s $f16, eventsEndTime($t5)
 
     # verify if the event inserted confliction with the atual event
-    c.lt.s $f14, $f15   # if f14 < f15
-    bc1t sortArray        
+    c.lt.s $f14, $f15   # if aux_eventEndTime < eventsStartTime
+    bc1t sortArray   # if true we insert in the current position and sort the array
+        
 
-    c.eq.s $f14, $f15   # if f14 == f15
-    bc1t sortArray          
+    c.lt.s $f16, $f13   # if eventsEndTime($t5) < aux_eventStartTime
+    bc1t exit_compareHour  # if true we insert in the next position and sort the array    
 
-    c.lt.s $f16, $f13   # if f16 < f13
-    bc1t exit_compareHour          
+    c.eq.s $f14, $f15   # if aux_eventEndTime == eventsStartTime($t5)   
+    bc1t errorInsert # if true we print the errorInput message
 
-    c.eq.s $f16, $f13   # if f16 == f13
-    bc1t exit_compareHour           
+    c.eq.s $f16, $f13   # if eventsEndTime($t5) == aux_eventStartTime
+    bc1t errorInsert # if true we print the errorInput message        
 
-    c.eq.s $f14, $f15   # if f14 == f15
-    bc1t errorInsert         
 
-    c.eq.s $f16, $f13   # if f16 == f13
-    bc1t errorInsert         
-
-    j errorInsert  # after all comparisons, we need to print the errorInput message
-
+# This function stores the event inserted in the aux variables in the current position from compareDay and pushes the events to the right to the next positions
 sortArray:
    # store aux_eventName into eventsName array
 
@@ -584,9 +579,21 @@ print:
 
 
 errorNoEventToPrint:
-   li $v0, 4
-   la $a0, print_noEventToPrint
-   syscall
+
+   # Print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall      
+
+   # print error message
+      li $v0, 4
+      la $a0, print_noEventToPrint
+      syscall
+
+   # Print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
 
    j loop_action
 
@@ -888,13 +895,20 @@ edit:
       la $a0, edit_keepThis
       syscall
 
+
    # reading the option
-    li $v0, 5               
-    syscall                
-    move $t3, $v0  
+      li $v0, 5               
+      syscall                
+      move $t3, $v0  
+
 
    # if $t3 is equal zero, jump to edit_jumpEndTime
       beq $t3, $zero, edit_jumpEndTime
+
+   # print what's new question
+      li $v0, 4
+      la $a0, edit_whatsNew
+      syscall
 
    # reading the event end time as float
       li $v0, 6
