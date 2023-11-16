@@ -613,7 +613,7 @@ remove:
       syscall
       sw $v0, eventNumber
 
-   # if $v0 is smaller than 2 or bigger than eventCounter we need to print the errorInput message
+   # if $v0 is smaller than 1 or bigger than eventCounter we need to print the errorInput message
       blt $v0, 1, errorWrongInputf
       sub $t0, $t0, 1
       bgt $v0, $t0, errorWrongInputf
@@ -622,6 +622,9 @@ remove:
    # eventNumber is number of the event to be removed
       lw $t0, eventNumber
       lw $t1, eventCounter
+
+   # loop to move all events right to the event removed one position to the left
+   loop_remover:
       addi $t0, $t0, 1
       bge $t0, $t1, exit_remover
       
@@ -651,6 +654,8 @@ remove:
 
       l.s $f13, eventsEndTime($t2)
       s.s $f13, eventsEndTime($t5)
+
+      j loop_remover
 
    exit_remover:
    # decrease eventCounter
@@ -709,21 +714,22 @@ edit:
       addi $t0, $t0, 1
       sw $t0, editer_flag
 
-   # storage the eventday in s0
+   # load the eventday in s0
       lw $t0, eventNumber
       mul $t0, $t0, 4 #MAX_LENGTH_DAY
 
       lw $s0, eventsDay($t0)
 
-   # storage the event start time in aux_eventStartTime
+   # store the event start time in aux_eventStartTime
       l.s $f12, eventsStartTime($t0)
       s.s $f12, aux_eventStartTime
 
-   # storage the event end time in aux_eventEndTime
+   # store the event end time in aux_eventEndTime
       l.s $f12, eventsEndTime($t0)
       s.s $f12, aux_eventEndTime
 
-   # storage the event name in aux_eventName
+   # store the event name in aux_eventName
+      lw $t0, eventNumber
       mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
       la $t1, eventsName($t0)
       la $t2, aux_eventName
@@ -986,8 +992,14 @@ errorNoEvent:
    j loop_action
 
 errorWrongInputf:
+   # print error message
    li $v0, 4
    la $a0, errorWrongInput
+   syscall
+
+   # print line break
+   li $v0, 4
+   la $a0, lineBreak
    syscall
 
    j loop_action
