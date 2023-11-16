@@ -80,7 +80,8 @@
       edit_eventStartTime: .asciiz "What is the new event start time?\n"
       edit_eventEndTime: .asciiz "What is the new event end time?\n"
       edit_noEventToEdit: .asciiz "There is no event to edit!\n"
-      edit_keepThis: .asciiz "\nKeep this value?\n[1] Yes\n[2] No\n"
+      edit_keepThis: .asciiz "\nKeep this value?\n[0] Yes\n[1] No\n"
+      edit_whatsNew: .asciiz "\nWhat is the new value?\n"
 .text
 .globl main
 
@@ -93,22 +94,11 @@ j loop_action
 
 # this function inserts a new event
 insert:
-   # load flag to a register
-   lw $t9, editer_flag
-  
-
- # storage the number 1 to the register
-   li $t7, 1
-
- # Check if $t9 == 1
-    beq $t9, $t7, insert_name_message # Branch if $t9 is not equal to 1
 
    # printing the event name question
       li $v0, 4
       la $a0, insert_eventName
       syscall
-
-   insert_name_message2:
 
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
       lw $t0, eventCounter
@@ -120,21 +110,14 @@ insert:
       li $a1, 50 #MAX_LENGTH_EVENT_NAME
       syscall
 
-   insert_name_message1:
-
    # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
       lw $t0, eventCounter
       mul $t0, $t0, 4
-
- # Check if $t9 == 1
-    beq $t9, $t7, insert_day_message # Branch if $t9 is not equal to 1
 
    # printing the event day question
       li $v0, 4
       la $a0, insert_eventDay
       syscall
-
-   insert_day_message2:
 
    # reading the event day as integer
       li $v0, 5
@@ -145,18 +128,10 @@ insert:
       blt $v0, 1, errorInsert
       bgt $v0, 31, errorInsert
 
-   insert_day_message1:
-
-   
- # Check if $t9 == 1
-    beq $t9, $t7, insert_startHour_message # Branch if $t9 is not equal to 1
-
    # printing the event start question
       li $v0, 4
       la $a0, insert_eventStartTime
       syscall
-
-   insert_startHour_message2:
 
    # reading the event start time as float
       li $v0, 6
@@ -202,17 +177,10 @@ insert:
       c.lt.s $f19, $f12  
       bc1t errorInsert   
 
-   insert_startHour_message1:    
-
- # Check if $t9 == 1
-    beq $t9, $t7, insert_endHour_message # Branch if $t9 is not equal to 1
-
    # print event end time
       li $v0, 4
       la $a0, insert_eventEndTime
       syscall
-
-   insert_endHour_message2:
 
    # reading the event end time as float
       li $v0, 6
@@ -269,111 +237,19 @@ insert:
       c.lt.s $f19, $f12  
       bc1t errorInsert 
 
-   insert_endHour_message1:     
-
       j compareDay
       
       day_insert:
       exit_sortArray:
-      
-      # reset editer_flag to 0 if it is 1
-      lw $t0, editer_flag
-      beq $t0, $zero, skipThis
-      sub $t0, $t0, 1
-      skipThis:
-      
+        
    # increase at one the eventCounter
       lw $t0, eventCounter
       addi $t0, $t0, 1
       sw $t0, eventCounter
 
       j loop_action
-
-   jumpIncrement:
-      #decrease 1 in eventCounter
-      lw $t1, eventCounter
-      subi $t1, $t1, 1
-      sw $t1, eventCounter
-
-      j loop_action
-
-   insert_name_message:
-      li $v0, 4
-      la $a0, edit_eventName
-      syscall
-
-      # keep question
-      li $v0, 4
-      la $a0, edit_keepThis
-      syscall
-
-      # read the int number of the action
-      li $v0, 5
-      syscall
-
-      # if v0 is equal to 1, we need to keep the value, jump to insert_name_message1
-      beq $v0, 1, insert_name_message1
-
-      j insert_name_message2
-
-   insert_day_message:
-      li $v0, 4
-      la $a0, edit_eventDay
-      syscall 
-
-     # keep question
-      li $v0, 4
-      la $a0, edit_keepThis
-      syscall
-
-      # read the int number of the action
-      li $v0, 5
-      syscall
-
-      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
-      beq $v0, 1, insert_day_message1
-
-      j insert_day_message2
-   insert_startHour_message:
-      li $v0, 4
-      la $a0, edit_eventStartTime
-      syscall 
-
-     # keep question
-      li $v0, 4
-      la $a0, edit_keepThis
-      syscall
-
-      # read the int number of the action
-      li $v0, 5
-      syscall
-
-      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
-      beq $v0, 1, insert_startHour_message1
-
-      j insert_startHour_message2 
-
-   insert_endHour_message:
-      li $v0, 4
-      la $a0, edit_eventEndTime
-      syscall
-
-     # keep question
-      li $v0, 4
-      la $a0, edit_keepThis
-      syscall
-
-      # read the int number of the action
-      li $v0, 5
-      syscall
-
-      # if v0 is equal to 1, we need to keep the value, jump to insert_day_message1
-      beq $v0, 1, insert_endHour_message1  
-
-      j insert_endHour_message2
  
 compareDay:
-
 
    # using auxCounter set to value 1
    li $t1, 1
@@ -708,8 +584,6 @@ print:
     exit_print:
         j loop_action
 
-
-
 # function to remove an event
 remove: 
    # if eventCounter is equal to 1, we have no events to remove
@@ -777,7 +651,7 @@ remove:
 
    lw $t0, editer_flag
    beq $t0, $zero loop_action
-   j insert
+   j edit_insert
 
 
 errorNoEventToRemove:
@@ -844,6 +718,228 @@ edit:
 
    # jumps to remove function with editer_flag set to 1
    j edit_remover
+
+   edit_insert:
+
+   # printing the event name question
+      li $v0, 4
+      la $a0, edit_eventName
+      syscall
+
+   # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
+
+   # print keep event question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+   # reading the option
+    li $v0, 5               
+    syscall                
+    move $t3, $v0  
+
+   # if $t3 is equal zero, jump to edit_jumpName
+      beq $t3, $zero, edit_jumpName
+
+   # print what's new question
+      li $v0, 4
+      la $a0, edit_whatsNew
+      syscall
+
+   # reading the event name
+      li $v0, 8
+      la $a0, aux_eventName
+      li $a1, 50 #MAX_LENGTH_EVENT_NAME
+      syscall
+
+   edit_jumpName:
+
+   # eventCounter starts in 1, so we need to multiply it by 4 to get the correct position in the array
+      lw $t0, eventCounter
+      mul $t0, $t0, 4
+
+   # printing the event day question
+      li $v0, 4
+      la $a0, insert_eventDay
+      syscall
+
+   # print keep event question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+   # reading the option
+    li $v0, 5               
+    syscall                
+    move $t3, $v0  
+
+   # if $t3 is equal zero, jump to edit_jumpDay
+      beq $t3, $zero, edit_jumpDay
+
+   # print what's new question
+      li $v0, 4
+      la $a0, edit_whatsNew
+      syscall
+
+   # reading the event day as integer
+      li $v0, 5
+      syscall
+      move $s0, $v0
+
+   # if $v0 is smaller than 1 or bigger than 31 we need to print the errorInput message
+      blt $v0, 1, errorInsert
+      bgt $v0, 31, errorInsert
+
+   edit_jumpDay:
+   
+   # printing the event start question
+      li $v0, 4
+      la $a0, insert_eventStartTime
+      syscall
+
+   # print keep event question
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+   
+   # reading the option
+    li $v0, 5               
+    syscall                
+    move $t3, $v0           
+
+   # if $t3 is equal zero, jump to edit_jumpStartTime
+      beq $t3, $zero, edit_jumpStartTime
+
+   # print what's new question
+      li $v0, 4
+      la $a0, edit_whatsNew
+      syscall
+
+   # reading the event start time as float
+      li $v0, 6
+      syscall
+      s.s $f0, aux_eventStartTime
+
+   # verify if is a valid hour
+
+      # if the hour is less than 0, we need to print the errorInput message
+      l.s $f12, MIN_HOUR
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
+
+      # if the hour is greater than 23.59, we need to print the errorInput message
+      l.s $f12, MAX_HOUR
+      c.lt.s $f12, $f0   # Compare if $f12 less than $f0
+      bc1t errorInsert   # if true, print error message
+
+      # for minutes greater than 59, we need to print the errorInput message
+
+      # storage aux_eventStartTime in $f12
+      l.s $f12, aux_eventStartTime
+
+      # Convert the floating-point value in f12 to an integer
+      cvt.w.s $f22, $f12   # Convert single-precision floating point to 32-bit integer in f0
+      # Store the integer part in an integer register
+      mfc1 $t6, $f22        # Move the integer value from f0 to $t0
+
+
+      # Move the integer value from $t6 to a floating-point register $f12
+      mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
+
+      # Convert the integer value in $f12 to a floating-point value
+      cvt.s.w $f16, $f16  # Convert 32-bit integer in $f12 to single-precision float in $f12
+
+      # Subtract the value in f16 from f12 and store the result in f12
+      sub.s $f12, $f12, $f16  
+
+      # storage MAX_MINUTES in $f19
+      l.s $f19, MAX_MINUTES
+
+      # compare if the minutes is greater than 59
+      c.lt.s $f19, $f12  
+      bc1t errorInsert
+
+   edit_jumpStartTime:  
+
+   # print event end time
+      li $v0, 4
+      la $a0, insert_eventEndTime
+      syscall
+
+   # print keep event qkeep
+      li $v0, 4
+      la $a0, edit_keepThis
+      syscall
+
+   # reading the option
+    li $v0, 5               
+    syscall                
+    move $t3, $v0  
+
+
+   # if $t3 is equal zero, jump to edit_jumpEndTime
+      beq $t3, $zero, edit_jumpEndTime
+
+   # reading the event end time as float
+      li $v0, 6
+      syscall
+      s.s $f0, aux_eventEndTime
+      l.s $f15, aux_eventStartTime
+      c.lt.s $f0, $f15   # if f0 < f15
+      bc1t errorInsert        
+
+      c.eq.s $f0, $f15   # if f0 == f15
+      bc1t errorInsert 
+
+   # verify if is a valid hour
+
+      # if the hour is less than 0, we need to print the errorInput message
+      l.s $f12, MIN_HOUR
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
+
+      # if the hour is greater than 23.59, we need to print the errorInput message
+      l.s $f12, MAX_HOUR
+      c.lt.s $f12, $f0   # Compare if $f12 less than $f0
+      bc1t errorInsert   # if true, print error message
+      
+      # if the hour is less than the start time, we need to print the errorInput message
+      l.s $f12, aux_eventStartTime
+      c.lt.s $f0, $f12   # Compare if $f0 less than $f12
+      bc1t errorInsert   # if true, print error message
+
+      # for minutes greater than 59, we need to print the errorInput message
+
+      # storage aux_eventStartTime in $f12
+      l.s $f12, aux_eventEndTime
+
+      # Convert the floating-point value in f12 to an integer
+      cvt.w.s $f22, $f12   # Convert single-precision floating point to 32-bit integer in f0
+      # Store the integer part in an integer register
+      mfc1 $t6, $f22        # Move the integer value from f0 to $t0
+
+
+      # Move the integer value from $t6 to a floating-point register $f12
+      mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
+
+      # Convert the integer value in $f12 to a floating-point value
+      cvt.s.w $f16, $f16  # Convert 32-bit integer in $f12 to single-precision float in $f12
+
+      # Subtract the value in f16 from f12 and store the result in f12
+      sub.s $f12, $f12, $f16  
+
+      # storage MAX_MINUTES in $f19
+      l.s $f19, MAX_MINUTES
+
+      # compare if the minutes is greater than 59
+      c.lt.s $f19, $f12  
+      bc1t errorInsert
+
+      edit_jumpEndTime:
+
+      j compareDay
 
 errorNoEvent:
    li $v0, 4
