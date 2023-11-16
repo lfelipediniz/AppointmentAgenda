@@ -702,7 +702,7 @@ edit:
       addi $t0, $t0, 1
       sw $t0, editer_flag
 
-   # storage the evventday in s0
+   # storage the eventday in s0
       lw $t0, eventNumber
       mul $t0, $t0, 4 #MAX_LENGTH_DAY
 
@@ -837,6 +837,8 @@ edit:
       syscall
       s.s $f0, aux_eventStartTime
 
+   edit_jumpStartTime:  
+
    # verify if is a valid hour
 
       # if the hour is less than 0, we need to print the errorInput message
@@ -875,14 +877,13 @@ edit:
       c.lt.s $f19, $f12  
       bc1t errorInsert
 
-   edit_jumpStartTime:  
 
    # print event end time
       li $v0, 4
       la $a0, edit_eventEndTime
       syscall
 
-   # print keep event qkeep
+   # print keep event keep
       li $v0, 4
       la $a0, edit_keepThis
       syscall
@@ -899,12 +900,17 @@ edit:
       li $v0, 6
       syscall
       s.s $f0, aux_eventEndTime
+      edit_jumpEndTime:
+      
       l.s $f15, aux_eventStartTime
+
       c.lt.s $f0, $f15   # if f0 < f15
       bc1t errorInsert        
 
       c.eq.s $f0, $f15   # if f0 == f15
       bc1t errorInsert 
+
+
 
    # verify if is a valid hour
 
@@ -949,7 +955,7 @@ edit:
       c.lt.s $f19, $f12  
       bc1t errorInsert
 
-      edit_jumpEndTime:
+
 
       # reset editer flag
       lw $t9, editer_flag
