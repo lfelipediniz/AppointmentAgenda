@@ -1,8 +1,8 @@
 #this script is a simple agenda for appointments make in MIPS assembly
+# tested on MARS 4.5
 
 # data segment
 .data
-
    #constants
       #strings
       MAX_EVENTS: .word 100
@@ -14,23 +14,19 @@
    #flags
       editer_flag: .word 0
 
-
    #variables
       #action inserted by the user
       action: .word 0
       # counter of events
       eventCounter: .word 1
-
       #event number for remove and edit
       eventNumber: .word 0
-      
 
       #auxiliary inputs
       aux_eventStartTime: .float 0.0
       aux_eventEndTime: .float 0.0
       aux_eventString: .space 50
       aux_eventName: .space 50
-
 
    # events name array with MAX_LENGTH_EVENT_NAME * MAX_EVENTS bytes
    eventsName: .space 5000
@@ -61,7 +57,6 @@
       insert_eventStartTime: .asciiz "What is the event start time? Format: HH.MM\n"
       insert_eventEndTime: .asciiz "What is the event end time? Format: HH.MM?\n"
 
-
       # print function outputs
       print_eventName: .asciiz "Event name: "
       print_eventDay: .asciiz "Event day: "
@@ -86,11 +81,11 @@
 .globl main
 
 # welcome message
-li $v0, 4
-la $a0, welcome
-syscall
+   li $v0, 4
+   la $a0, welcome
+   syscall
 
-j loop_action
+   j loop_action
 
 # this function inserts a new event
 insert:
@@ -278,15 +273,12 @@ compareDay:
 
        exit_insertNameinAux:
 
-
       # if the day inserted is equal to any day in the array, we need to print the errorInput message
       mul $t3, $t1, 4 #MAX_LENGTH_DAY
       
-
       lw $t4, eventsDay($t3)
       l.s $f14, eventsStartTime($t3)
       l.s $f16, eventsEndTime($t3)
-
 
       beq $t4, $s0, compareHour
 
@@ -295,7 +287,6 @@ compareDay:
       # if the day inserted is less than any day in the array, we need to insert it in actual position
       blt $s0, $t4, sortArray
 
-      
       # Increment auxCounter
       addi $t1, $t1, 1
    j loop_compareDay
@@ -331,8 +322,6 @@ compareHour:
 
     j errorInsert  # after all comparisons, we need to print the errorInput message
 
-
-
 sortArray:
    # store aux_eventName into eventsName array
 
@@ -350,7 +339,6 @@ sortArray:
       j exit_insertAuxName
 
    exit_insertAuxName:
-
 
    mul $t3, $t1, 4 #MAX_LENGTH_DAY
    # store day inserted in the array
@@ -455,8 +443,6 @@ exit_compareDay:
    la $t1, aux_eventName
    la $t2, eventsName($t0)
 
-
-
    # loop to copy the aux_eventName into eventsName
    loop_insertName:
       lb $t3, 0($t1)
@@ -481,7 +467,6 @@ errorInsert:
    syscall
       
    j loop_action
-
 
 # function of print all events
 print:
@@ -521,7 +506,6 @@ print:
       mul $t2, $t0, 50 #MAX_LENGTH_EVENT_NAME
       add $a0, $a0, $t2
       syscall
-
 
       # Print text of event day
       li $v0, 4
@@ -590,7 +574,6 @@ remove:
    lw $t0, eventCounter
    beq $t0, 1, errorNoEventToRemove
 
-
     # print the event number question
       li $v0, 4
       la $a0, remove_eventNumber
@@ -605,7 +588,6 @@ remove:
       blt $v0, 1, errorWrongInputf
       sub $t0, $t0, 1
       bgt $v0, $t0, errorWrongInputf
-
 
    edit_remover:
    # eventNumber is number of the event to be removed
@@ -629,7 +611,6 @@ remove:
 
       exit_nameRemover:
 
-
       mul $t2, $t0, 4 #MAX_LENGTH_DAY
       sub $t5, $t2, 4 #MAX_LENGTH_DAY
       
@@ -642,7 +623,6 @@ remove:
       l.s $f13, eventsEndTime($t2)
       s.s $f13, eventsEndTime($t5)
 
-
    exit_remover:
    # decrease eventCounter
    lw $t1, eventCounter
@@ -652,7 +632,6 @@ remove:
    lw $t0, editer_flag
    beq $t0, $zero loop_action
    j edit_insert
-
 
 errorNoEventToRemove:
    li $v0, 4
@@ -844,7 +823,6 @@ edit:
       # Store the integer part in an integer register
       mfc1 $t6, $f22        # Move the integer value from f0 to $t0
 
-
       # Move the integer value from $t6 to a floating-point register $f12
       mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
 
@@ -877,7 +855,6 @@ edit:
     li $v0, 5               
     syscall                
     move $t3, $v0  
-
 
    # if $t3 is equal zero, jump to edit_jumpEndTime
       beq $t3, $zero, edit_jumpEndTime
@@ -919,7 +896,6 @@ edit:
       cvt.w.s $f22, $f12   # Convert single-precision floating point to 32-bit integer in f0
       # Store the integer part in an integer register
       mfc1 $t6, $f22        # Move the integer value from f0 to $t0
-
 
       # Move the integer value from $t6 to a floating-point register $f12
       mtc1 $t6, $f16     # Move the integer value in $t6 to floating-point register $f12
