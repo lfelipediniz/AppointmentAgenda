@@ -72,13 +72,13 @@
 
       # edit function outputs
       edit_eventNumber: .asciiz "What is the event number to be edited?\n"
-      edit_eventName: .asciiz "What is the new event name?\n"
-      edit_eventDay: .asciiz "What is the new event day?\n"
-      edit_eventStartTime: .asciiz "What is the new event start time?\n"
-      edit_eventEndTime: .asciiz "What is the new event end time?\n"
+      edit_eventName: .asciiz "Event name:"
+      edit_eventDay: .asciiz "Event day:"
+      edit_eventStartTime: .asciiz "Event start time:"
+      edit_eventEndTime: .asciiz "Event end time:"
       edit_noEventToEdit: .asciiz "There is no event to edit!\n"
-      edit_keepThis: .asciiz "\nKeep this value?\n[0] Yes\n[1] No\n"
-      edit_whatsNew: .asciiz "\nWhat is the new value?\n"
+      edit_keepThis: .asciiz "\nChange this value?\n[1] Yes\n[0] No\n"
+      edit_whatsNew: .asciiz "What is the new value?\n"
 
 .text
 .globl main
