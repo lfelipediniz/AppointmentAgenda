@@ -47,6 +47,7 @@
       welcome: .asciiz "Welcome to AppointmentAgenda!\n"
       notImplemented: .asciiz "Not implemented yet!\n"
       errorWrongInput: .asciiz "\nWrong input!\n"
+      operationSucceeded: .asciiz "\nOperation succeeded!\n"
 
       # line break
       lineBreak: .asciiz "\n"
@@ -78,6 +79,7 @@
       edit_noEventToEdit: .asciiz "There is no event to edit!\n"
       edit_keepThis: .asciiz "\nKeep this value?\n[0] Yes\n[1] No\n"
       edit_whatsNew: .asciiz "\nWhat is the new value?\n"
+
 .text
 .globl main
 
@@ -242,6 +244,16 @@ insert:
       lw $t0, eventCounter
       addi $t0, $t0, 1
       sw $t0, eventCounter
+
+   # print operation succeeded message
+      li $v0, 4
+      la $a0, operationSucceeded
+      syscall
+
+   # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
 
       j loop_action
  
@@ -474,7 +486,7 @@ print:
     # using auxCounter set to 1
     li $t0, 1
     lw $t1, eventCounter
-    beq $t1, $t1, errorNoEventToPrint
+    beq $t0, $t1, errorNoEventToPrint
 
     # loop to print all information about events
     loop_print:
@@ -639,9 +651,23 @@ remove:
    subi $t1, $t1, 1
    sw $t1, eventCounter
 
+   # if editer_flag is equal to 1, we need to jump to edit_insert, else we need to print the operationSucceeded message
    lw $t0, editer_flag
-   beq $t0, $zero loop_action
+   beq $t0, $zero removeSuccess
    j edit_insert
+
+   removeSuccess:
+      # operation succeeded message
+      li $v0, 4
+      la $a0, operationSucceeded
+      syscall
+      
+      # print line break
+      li $v0, 4
+      la $a0, lineBreak
+      syscall
+
+      j loop_action
 
 errorNoEventToRemove:
    li $v0, 4
@@ -924,6 +950,11 @@ edit:
       bc1t errorInsert
 
       edit_jumpEndTime:
+
+      # reset editer flag
+      lw $t9, editer_flag
+      subi $t9, $t9, 1
+      sw $t9, editer_flag
 
       j compareDay
 
