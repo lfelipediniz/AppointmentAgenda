@@ -63,6 +63,7 @@
       print_eventStartTime: .asciiz "Event start time: "
       print_eventEndTime: .asciiz "Event end time: "
       print_eventNumber: .asciiz "Event number: "
+      print_noEventToPrint: .asciiz "There is no event to print!\n"
 
       # remove function outputs
       remove_eventNumber: .asciiz "What is the event number to be removed?\n"
@@ -473,6 +474,7 @@ print:
     # using auxCounter set to 1
     li $t0, 1
     lw $t1, eventCounter
+    beq $t1, $t1, errorNoEventToPrint
 
     # loop to print all information about events
     loop_print:
@@ -567,6 +569,14 @@ print:
 
     exit_print:
         j loop_action
+
+
+errorNoEventToPrint:
+   li $v0, 4
+   la $a0, print_noEventToPrint
+   syscall
+
+   j loop_action
 
 # function to remove an event
 remove: 
