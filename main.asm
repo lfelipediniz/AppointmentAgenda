@@ -8,8 +8,8 @@
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
-      MAX_HOUR: .float 23.59
-      MAX_MINUTES: .float 0.59
+      MAX_HOUR: .float 23.5999
+      MAX_MINUTES: .float 0.5999
 
    #flags
       editer_flag: .word 0
