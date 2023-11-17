@@ -8,8 +8,8 @@
       MAX_EVENTS: .word 100
       MAX_LENGTH_EVENT_NAME: .word 50
       MIN_HOUR: .float 0.0
-      MAX_HOUR: .float 23.5999
-      MAX_MINUTES: .float 0.5999
+      MAX_HOUR: .float 23.59
+      MAX_MINUTES: .float 0.59
 
    #flags
       editer_flag: .word 0
@@ -72,10 +72,10 @@
 
       # edit function outputs
       edit_eventNumber: .asciiz "What is the event number to be edited?\n"
-      edit_eventName: .asciiz "Event name: "
-      edit_eventDay: .asciiz "Event day: "
-      edit_eventStartTime: .asciiz "Event start time: "
-      edit_eventEndTime: .asciiz "Event end time: "
+      edit_eventName: .asciiz "Event name:"
+      edit_eventDay: .asciiz "Event day:"
+      edit_eventStartTime: .asciiz "Event start time:"
+      edit_eventEndTime: .asciiz "Event end time:"
       edit_noEventToEdit: .asciiz "There is no event to edit!\n"
       edit_keepThis: .asciiz "\nChange this value?\n[1] Yes\n[0] No\n"
       edit_whatsNew: .asciiz "What is the new value?\n"
@@ -309,24 +309,18 @@ compareHour:
   mul $t5, $t1, 4 #MAX_LENGTH_HOUR
 
   # store the start time and end time of the event inserted confliction and atual event
-  l.s $f13, aux_eventStartTime
-  l.s $f14, aux_eventEndTime
-  l.s $f15, eventsStartTime($t5)
-  l.s $f16, eventsEndTime($t5)
+  l.s $f18, aux_eventStartTime
+  l.s $f19, aux_eventEndTime
+  l.s $f20, eventsStartTime($t5)
+  l.s $f21, eventsEndTime($t5)
 
     # verify if the event inserted confliction with the atual event
-    c.lt.s $f14, $f15   # if aux_eventEndTime < eventsStartTime
+    c.lt.s $f19, $f20   # if aux_eventEndTime < eventsStartTime
     bc1t sortArray   # if true we insert in the current position and sort the array
         
 
-    c.lt.s $f16, $f13   # if eventsEndTime($t5) < aux_eventStartTime
+    c.lt.s $f21, $f18   # if eventsEndTime($t5) < aux_eventStartTime
     bc1t exit_compareHour  # if true we insert in the next position and sort the array    
-
-    c.eq.s $f14, $f15   # if aux_eventEndTime == eventsStartTime($t5)   
-    bc1t errorInsert # if true we print the errorInput message
-
-    c.eq.s $f16, $f13   # if eventsEndTime($t5) == aux_eventStartTime
-    bc1t errorInsert # if true we print the errorInput message    
 
     j errorInsert    
 
@@ -756,11 +750,6 @@ edit:
       la $a0, edit_eventName
       syscall
 
-   # print the value storage on aux_eventName
-      li $v0, 4
-      la $a0, aux_eventName
-      syscall
-
    # eventCounter starts in 1, so we need to multiply it by MAX_LENGTH_EVENT_NAME to get the correct position in the array
       lw $t0, eventCounter
       mul $t0, $t0, 50 #MAX_LENGTH_EVENT_NAME
@@ -800,11 +789,6 @@ edit:
       la $a0, edit_eventDay
       syscall
 
-   # print the value storage on s0
-      li $v0, 1
-      move $a0, $s0
-      syscall
-
    # print keep event question
       li $v0, 4
       la $a0, edit_keepThis
@@ -837,11 +821,6 @@ edit:
    # printing the event start question
       li $v0, 4
       la $a0, edit_eventStartTime
-      syscall
-
-   # print the value storage on aux_eventStartTime
-      li $v0, 2
-      l.s $f12, aux_eventStartTime
       syscall
 
    # print keep event question
@@ -911,11 +890,6 @@ edit:
    # print event end time
       li $v0, 4
       la $a0, edit_eventEndTime
-      syscall
-
-   # print the value storage on aux_eventEndTime
-      li $v0, 2
-      l.s $f12, aux_eventEndTime
       syscall
 
    # print keep event keep
