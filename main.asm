@@ -326,7 +326,9 @@ compareHour:
     bc1t errorInsert # if true we print the errorInput message
 
     c.eq.s $f16, $f13   # if eventsEndTime($t5) == aux_eventStartTime
-    bc1t errorInsert # if true we print the errorInput message        
+    bc1t errorInsert # if true we print the errorInput message    
+
+    j errorInsert    
 
 
 # This function stores the event inserted in the aux variables in the current position from compareDay and pushes the events to the right to the next positions
