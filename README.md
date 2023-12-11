@@ -37,6 +37,12 @@ Additionally, the calendar allows users to remove events. This feature ensures t
     cd AppointmentAgenda
     ```
 
+3. Run in terminal directly through, 
+    ```bash
+    java -jar Mars4_5.jar nc main.asm
+    ```
+note that your Mars file may have another name
+
 ### Usage
 
 To run our code, open it in the **Mars** program. After opening it, press the F3 key on your keyboard. If everything goes well, press F5 and enjoy your agenda of appointments.
